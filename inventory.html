@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>入出庫・納期管理</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --panel: #ffffff;
+      --border: #dfe3e8;
+      --text: #1f2933;
+      --muted: #6b7684;
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --danger: #dc2626;
+      --danger-bg: #fdecec;
+      --warn: #d97706;
+      --warn-bg: #fef4e6;
+      --ok: #059669;
+      --ok-bg: #e7f6ef;
+      --shadow: 0 1px 3px rgba(16, 24, 40, .08), 0 1px 2px rgba(16, 24, 40, .06);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    header.app-header {
+      background: #0f172a;
+      color: #fff;
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    header.app-header h1 { font-size: 17px; margin: 0; font-weight: 600; letter-spacing: .02em; }
+    header.app-header .sub { color: #94a3b8; font-size: 12px; margin-top: 2px; }
+    .wrap { padding: 18px 20px 60px; max-width: 1500px; margin: 0 auto; }
+
+    /* summary cards */
+    .cards { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
+    .card {
+      background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px 16px; min-width: 120px; flex: 1 1 120px; box-shadow: var(--shadow);
+    }
+    .card .label { font-size: 12px; color: var(--muted); }
+    .card .num { font-size: 24px; font-weight: 700; margin-top: 2px; }
+    .card.mikonyuko { border-left: 4px solid #94a3b8; }
+    .card.ichibu { border-left: 4px solid var(--warn); }
+    .card.kanryo { border-left: 4px solid var(--ok); }
+    .card.shukko { border-left: 4px solid var(--accent); }
+    .card.chien { border-left: 4px solid var(--danger); }
+    .card.chien .num { color: var(--danger); }
+
+    /* toolbar */
+    .toolbar {
+      display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+      background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
+      padding: 10px 12px; margin-bottom: 14px; box-shadow: var(--shadow);
+    }
+    .toolbar input[type=search], .toolbar select {
+      padding: 7px 10px; border: 1px solid var(--border); border-radius: 7px; font-size: 13px;
+      background: #fff; color: var(--text);
+    }
+    .toolbar input[type=search] { min-width: 190px; }
+    .spacer { flex: 1 1 auto; }
+    button {
+      font-family: inherit; font-size: 13px; cursor: pointer; border-radius: 7px;
+      border: 1px solid var(--border); background: #fff; color: var(--text);
+      padding: 7px 12px; transition: background .12s, border-color .12s;
+    }
+    button:hover { background: #f1f5f9; }
+    button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+    button.primary:hover { background: var(--accent-dark); }
+    button.danger { color: var(--danger); border-color: #f0c4c4; }
+    button.danger:hover { background: var(--danger-bg); }
+    label.check { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); cursor: pointer; }
+
+    /* table */
+    .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow-x: auto; box-shadow: var(--shadow); }
+    table { border-collapse: collapse; width: 100%; min-width: 1180px; font-size: 13px; }
+    thead th {
+      position: sticky; top: 0; background: #f8fafc; color: var(--muted);
+      text-align: left; font-weight: 600; padding: 9px 10px; border-bottom: 2px solid var(--border);
+      white-space: nowrap; font-size: 12px;
+    }
+    tbody td { padding: 8px 10px; border-bottom: 1px solid #eef1f4; vertical-align: middle; white-space: nowrap; }
+    tbody tr:hover { background: #f8fbff; }
+    tr.done { color: var(--muted); background: #fbfcfd; }
+    tr.overdue td.due { color: var(--danger); font-weight: 700; }
+    tr.soon td.due { color: var(--warn); font-weight: 600; }
+    td.num-col { text-align: right; font-variant-numeric: tabular-nums; }
+    .part { font-weight: 600; }
+
+    .badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
+    .badge.s-mikonyuko { background: #eef1f4; color: #52606d; }
+    .badge.s-ichibu { background: var(--warn-bg); color: var(--warn); }
+    .badge.s-kanryo { background: var(--ok-bg); color: var(--ok); }
+    .badge.s-shukko { background: #e6effe; color: var(--accent); }
+
+    /* progress bar */
+    .prog { display: flex; align-items: center; gap: 7px; min-width: 110px; }
+    .prog .track { flex: 1; height: 7px; background: #eef1f4; border-radius: 999px; overflow: hidden; }
+    .prog .fill { height: 100%; background: var(--ok); border-radius: 999px; }
+    .prog .pct { font-size: 11.5px; color: var(--muted); min-width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+
+    .pri-cell { display: flex; align-items: center; gap: 2px; }
+    .pri-cell .rank { min-width: 20px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .pri-cell button { padding: 0 5px; font-size: 12px; line-height: 20px; border-radius: 5px; }
+    .row-actions button { padding: 4px 9px; font-size: 12px; margin-right: 4px; }
+    .flag { color: var(--danger); font-weight: 700; margin-left: 3px; }
+
+    .empty { padding: 48px 20px; text-align: center; color: var(--muted); }
+
+    /* modal */
+    .modal-back {
+      position: fixed; inset: 0; background: rgba(15, 23, 42, .45);
+      display: none; align-items: flex-start; justify-content: center; padding: 30px 14px; z-index: 50; overflow-y: auto;
+    }
+    .modal-back.open { display: flex; }
+    .modal {
+      background: #fff; border-radius: 12px; width: 100%; max-width: 640px; padding: 22px 24px 24px;
+      box-shadow: 0 20px 40px rgba(0,0,0,.25);
+    }
+    .modal h2 { margin: 0 0 16px; font-size: 17px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field.full { grid-column: 1 / -1; }
+    .field label { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .field label .req { color: var(--danger); }
+    .field input, .field textarea {
+      padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; font-size: 14px; font-family: inherit; color: var(--text);
+    }
+    .field input:focus, .field textarea:focus { outline: 2px solid #bfd4fb; border-color: var(--accent); }
+    .field .hint { font-size: 11px; color: var(--muted); }
+    .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+    .modal-actions .spacer { flex: 1; }
+
+    @media (max-width: 600px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .wrap { padding: 14px 12px 50px; }
+      header.app-header { padding: 12px 14px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div>
+      <h1>入出庫・納期管理</h1>
+      <div class="sub">品番・数量・要望納期・在庫進捗を一元管理 ／ 未入庫を含めて優先順位を把握</div>
+    </div>
+    <div>
+      <button class="primary" id="btnAdd">＋ 新規登録</button>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="cards" id="cards"></div>
+
+    <div class="toolbar">
+      <input type="search" id="search" placeholder="品番・顧客・注文番号・LOTで検索">
+      <select id="filterStatus">
+        <option value="">すべての状態</option>
+        <option value="未入庫">未入庫</option>
+        <option value="一部入庫">一部入庫</option>
+        <option value="入庫完了">入庫完了</option>
+        <option value="出庫済">出庫済</option>
+      </select>
+      <select id="sortMode">
+        <option value="priority">並び順：優先度（納期＋手動）</option>
+        <option value="due">並び順：要望納期</option>
+        <option value="part">並び順：品番</option>
+        <option value="customer">並び順：顧客名</option>
+      </select>
+      <label class="check"><input type="checkbox" id="hideDone"> 出庫済を隠す</label>
+      <span class="spacer"></span>
+      <button id="btnImport">CSV読込</button>
+      <button id="btnExport">CSV書出</button>
+      <button id="btnSample">サンプル投入</button>
+      <input type="file" id="fileInput" accept=".csv,text/csv" style="display:none">
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>優先</th>
+            <th>状態</th>
+            <th>品番</th>
+            <th>顧客名</th>
+            <th>注文/管理番号</th>
+            <th class="num-col">数量</th>
+            <th class="num-col">入庫済</th>
+            <th>在庫進捗</th>
+            <th>要望納期</th>
+            <th>入庫予定</th>
+            <th>入庫実績</th>
+            <th>出庫予定</th>
+            <th>出庫実績</th>
+            <th>LOT番号</th>
+            <th>備考</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+      <div class="empty" id="empty" style="display:none">
+        データがありません。「＋ 新規登録」または「サンプル投入」から始めてください。
+      </div>
+    </div>
+  </div>
+
+  <!-- modal -->
+  <div class="modal-back" id="modalBack">
+    <div class="modal">
+      <h2 id="modalTitle">新規登録</h2>
+      <div class="form-grid">
+        <div class="field">
+          <label>品番 <span class="req">*</span></label>
+          <input id="f_partNo" type="text" placeholder="例）ABC-1000">
+        </div>
+        <div class="field">
+          <label>顧客名 / 取引先</label>
+          <input id="f_customer" type="text" placeholder="例）○○製作所">
+        </div>
+        <div class="field">
+          <label>注文 / 管理番号</label>
+          <input id="f_orderNo" type="text" placeholder="例）PO-2026-001">
+        </div>
+        <div class="field">
+          <label>LOT番号</label>
+          <input id="f_lot" type="text" placeholder="例）L240911">
+        </div>
+        <div class="field">
+          <label>数量 <span class="req">*</span></label>
+          <input id="f_qty" type="number" min="0" step="1" placeholder="0">
+        </div>
+        <div class="field">
+          <label>入庫済数量</label>
+          <input id="f_receivedQty" type="number" min="0" step="1" placeholder="0">
+          <span class="hint">数量に達すると自動で「入庫完了」になります</span>
+        </div>
+        <div class="field">
+          <label>要望納期 <span class="req">*</span></label>
+          <input id="f_dueDate" type="date">
+        </div>
+        <div class="field">
+          <label>手動優先度</label>
+          <input id="f_manualPriority" type="number" min="1" step="1" placeholder="空欄=納期順で自動">
+          <span class="hint">小さいほど上位。空欄なら納期順</span>
+        </div>
+        <div class="field">
+          <label>入庫予定日</label>
+          <input id="f_inPlanDate" type="date">
+        </div>
+        <div class="field">
+          <label>入庫実績日</label>
+          <input id="f_inActualDate" type="date">
+        </div>
+        <div class="field">
+          <label>出庫予定日</label>
+          <input id="f_outPlanDate" type="date">
+        </div>
+        <div class="field">
+          <label>出庫実績日</label>
+          <input id="f_outActualDate" type="date">
+          <span class="hint">入力すると「出庫済」になります</span>
+        </div>
+        <div class="field full">
+          <label>備考</label>
+          <textarea id="f_note" rows="2" placeholder="連絡事項・特記事項など"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="danger" id="btnDelete" style="display:none">削除</button>
+        <span class="spacer"></span>
+        <button id="btnCancel">キャンセル</button>
+        <button class="primary" id="btnSave">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    "use strict";
+    const STORAGE_KEY = "darazu_inventory_v1";
+    const FIELDS = ["partNo","customer","orderNo","lot","qty","receivedQty","dueDate","manualPriority","inPlanDate","inActualDate","outPlanDate","outActualDate","note"];
+
+    // ---- state ----
+    let records = [];
+    let editingId = null;
+
+    function load() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        records = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(records)) records = [];
+      } catch (e) { records = []; }
+    }
+    function save() {
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }
+      catch (e) { alert("保存に失敗しました（ブラウザのストレージ制限の可能性があります）"); }
+    }
+    function uid() { return "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+    // ---- derived ----
+    function status(r) {
+      if (r.outActualDate) return "出庫済";
+      const qty = Number(r.qty) || 0;
+      const rec = Number(r.receivedQty) || 0;
+      if (qty > 0 && rec >= qty) return "入庫完了";
+      if (rec > 0) return "一部入庫";
+      return "未入庫";
+    }
+    function progress(r) {
+      if (status(r) === "出庫済") return 100;
+      const qty = Number(r.qty) || 0;
+      const rec = Number(r.receivedQty) || 0;
+      if (qty <= 0) return 0;
+      return Math.min(100, Math.round(rec / qty * 100));
+    }
+    function isActive(r) { const s = status(r); return s !== "出庫済"; }
+    function todayStr() { return new Date().toISOString().slice(0, 10); }
+    function daysUntil(dateStr) {
+      if (!dateStr) return null;
+      const d = new Date(dateStr + "T00:00:00");
+      const t = new Date(todayStr() + "T00:00:00");
+      return Math.round((d - t) / 86400000);
+    }
+
+    // ---- rendering ----
+    const STATUS_CLASS = { "未入庫":"s-mikonyuko", "一部入庫":"s-ichibu", "入庫完了":"s-kanryo", "出庫済":"s-shukko" };
+
+    function computeSorted() {
+      const mode = document.getElementById("sortMode").value;
+      const search = document.getElementById("search").value.trim().toLowerCase();
+      const fStatus = document.getElementById("filterStatus").value;
+      const hideDone = document.getElementById("hideDone").checked;
+
+      let list = records.filter(r => {
+        if (hideDone && status(r) === "出庫済") return false;
+        if (fStatus && status(r) !== fStatus) return false;
+        if (search) {
+          const hay = [r.partNo, r.customer, r.orderNo, r.lot, r.note].join(" ").toLowerCase();
+          if (!hay.includes(search)) return false;
+        }
+        return true;
+      });
+
+      const farFuture = "9999-12-31";
+      if (mode === "part") {
+        list.sort((a, b) => (a.partNo || "").localeCompare(b.partNo || "", "ja"));
+      } else if (mode === "customer") {
+        list.sort((a, b) => (a.customer || "").localeCompare(b.customer || "", "ja"));
+      } else if (mode === "due") {
+        list.sort((a, b) => (a.dueDate || farFuture).localeCompare(b.dueDate || farFuture));
+      } else { // priority: 完了は下、手動優先度→納期
+        list.sort((a, b) => {
+          const aDone = status(a) === "出庫済" ? 1 : 0;
+          const bDone = status(b) === "出庫済" ? 1 : 0;
+          if (aDone !== bDone) return aDone - bDone;
+          const aM = a.manualPriority ? Number(a.manualPriority) : Infinity;
+          const bM = b.manualPriority ? Number(b.manualPriority) : Infinity;
+          if (aM !== bM) return aM - bM;
+          return (a.dueDate || farFuture).localeCompare(b.dueDate || farFuture);
+        });
+      }
+      return list;
+    }
+
+    function esc(s) {
+      return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
+    }
+
+    function render() {
+      const list = computeSorted();
+      const tbody = document.getElementById("tbody");
+      const empty = document.getElementById("empty");
+      tbody.innerHTML = "";
+      empty.style.display = records.length === 0 ? "block" : "none";
+
+      const showPriMode = document.getElementById("sortMode").value === "priority";
+
+      list.forEach((r, idx) => {
+        const s = status(r);
+        const p = progress(r);
+        const du = daysUntil(r.dueDate);
+        const active = isActive(r);
+        let rowClass = "";
+        if (s === "出庫済") rowClass = "done";
+        else if (du !== null && du < 0) rowClass = "overdue";
+        else if (du !== null && du <= 7) rowClass = "soon";
+
+        const tr = document.createElement("tr");
+        tr.className = rowClass;
+        const rankDisplay = showPriMode ? (idx + 1) : "–";
+        const dueLabel = r.dueDate ? esc(r.dueDate) + (active && du !== null ? (du < 0 ? " (" + (-du) + "日超過)" : du === 0 ? " (本日)" : " (残" + du + "日)") : "") : "";
+
+        tr.innerHTML =
+          '<td><div class="pri-cell">' +
+            '<button data-act="up" title="上へ">▲</button>' +
+            '<span class="rank">' + rankDisplay + '</span>' +
+            '<button data-act="down" title="下へ">▼</button>' +
+            (r.manualPriority ? '<span class="flag" title="手動優先度 ' + esc(r.manualPriority) + '">★</span>' : '') +
+          '</div></td>' +
+          '<td><span class="badge ' + STATUS_CLASS[s] + '">' + s + '</span></td>' +
+          '<td class="part">' + esc(r.partNo) + '</td>' +
+          '<td>' + esc(r.customer) + '</td>' +
+          '<td>' + esc(r.orderNo) + '</td>' +
+          '<td class="num-col">' + (Number(r.qty) || 0).toLocaleString() + '</td>' +
+          '<td class="num-col">' + (Number(r.receivedQty) || 0).toLocaleString() + '</td>' +
+          '<td><div class="prog"><div class="track"><div class="fill" style="width:' + p + '%"></div></div><span class="pct">' + p + '%</span></div></td>' +
+          '<td class="due">' + dueLabel + '</td>' +
+          '<td>' + esc(r.inPlanDate) + '</td>' +
+          '<td>' + esc(r.inActualDate) + '</td>' +
+          '<td>' + esc(r.outPlanDate) + '</td>' +
+          '<td>' + esc(r.outActualDate) + '</td>' +
+          '<td>' + esc(r.lot) + '</td>' +
+          '<td>' + esc(r.note) + '</td>' +
+          '<td class="row-actions"><button data-act="edit">編集</button></td>';
+
+        tr.querySelector('[data-act=edit]').addEventListener("click", () => openEdit(r.id));
+        tr.querySelector('[data-act=up]').addEventListener("click", () => nudge(r.id, -1));
+        tr.querySelector('[data-act=down]').addEventListener("click", () => nudge(r.id, 1));
+        tbody.appendChild(tr);
+      });
+
+      renderCards();
+    }
+
+    function renderCards() {
+      const counts = { "未入庫":0, "一部入庫":0, "入庫完了":0, "出庫済":0 };
+      let overdue = 0;
+      records.forEach(r => {
+        counts[status(r)]++;
+        if (isActive(r)) { const du = daysUntil(r.dueDate); if (du !== null && du < 0) overdue++; }
+      });
+      const cards = [
+        { cls: "chien", label: "納期超過(未完了)", num: overdue },
+        { cls: "mikonyuko", label: "未入庫", num: counts["未入庫"] },
+        { cls: "ichibu", label: "一部入庫", num: counts["一部入庫"] },
+        { cls: "kanryo", label: "入庫完了", num: counts["入庫完了"] },
+        { cls: "shukko", label: "出庫済", num: counts["出庫済"] },
+      ];
+      document.getElementById("cards").innerHTML = cards.map(c =>
+        '<div class="card ' + c.cls + '"><div class="label">' + c.label + '</div><div class="num">' + c.num + '</div></div>'
+      ).join("");
+    }
+
+    // ---- manual priority nudge ----
+    // 表示中の並び順で前後と入れ替えるように手動優先度を振り直す
+    function nudge(id, dir) {
+      const list = computeSorted();
+      const idx = list.findIndex(r => r.id === id);
+      const swapIdx = idx + dir;
+      if (idx < 0 || swapIdx < 0 || swapIdx >= list.length) return;
+      // 現在の表示順を手動優先度として全行に確定させてから入れ替える
+      list.forEach((r, i) => { r.manualPriority = i + 1; });
+      const tmp = list[idx].manualPriority;
+      list[idx].manualPriority = list[swapIdx].manualPriority;
+      list[swapIdx].manualPriority = tmp;
+      document.getElementById("sortMode").value = "priority";
+      save(); render();
+    }
+
+    // ---- modal ----
+    const modalBack = document.getElementById("modalBack");
+    function openAdd() {
+      editingId = null;
+      document.getElementById("modalTitle").textContent = "新規登録";
+      document.getElementById("btnDelete").style.display = "none";
+      FIELDS.forEach(f => { const el = document.getElementById("f_" + f); if (el) el.value = ""; });
+      document.getElementById("f_dueDate").value = todayStr();
+      modalBack.classList.add("open");
+      document.getElementById("f_partNo").focus();
+    }
+    function openEdit(id) {
+      const r = records.find(x => x.id === id);
+      if (!r) return;
+      editingId = id;
+      document.getElementById("modalTitle").textContent = "編集";
+      document.getElementById("btnDelete").style.display = "inline-block";
+      FIELDS.forEach(f => { const el = document.getElementById("f_" + f); if (el) el.value = r[f] == null ? "" : r[f]; });
+      modalBack.classList.add("open");
+    }
+    function closeModal() { modalBack.classList.remove("open"); editingId = null; }
+
+    function saveModal() {
+      const partNo = document.getElementById("f_partNo").value.trim();
+      const qty = document.getElementById("f_qty").value.trim();
+      const dueDate = document.getElementById("f_dueDate").value;
+      if (!partNo) { alert("品番を入力してください"); return; }
+      if (qty === "" || Number(qty) < 0) { alert("数量を入力してください"); return; }
+      if (!dueDate) { alert("要望納期を入力してください"); return; }
+
+      const data = {};
+      FIELDS.forEach(f => {
+        const el = document.getElementById("f_" + f);
+        data[f] = el ? el.value.trim() : "";
+      });
+
+      if (editingId) {
+        const r = records.find(x => x.id === editingId);
+        Object.assign(r, data);
+      } else {
+        data.id = uid();
+        records.push(data);
+      }
+      save(); render(); closeModal();
+    }
+    function deleteRecord() {
+      if (!editingId) return;
+      if (!confirm("この行を削除しますか？")) return;
+      records = records.filter(r => r.id !== editingId);
+      save(); render(); closeModal();
+    }
+
+    // ---- CSV ----
+    const CSV_HEADERS = [
+      ["partNo","品番"], ["customer","顧客名"], ["orderNo","注文/管理番号"], ["lot","LOT番号"],
+      ["qty","数量"], ["receivedQty","入庫済数量"], ["status","状態"], ["progress","進捗率"],
+      ["dueDate","要望納期"], ["manualPriority","手動優先度"],
+      ["inPlanDate","入庫予定日"], ["inActualDate","入庫実績日"],
+      ["outPlanDate","出庫予定日"], ["outActualDate","出庫実績日"], ["note","備考"]
+    ];
+    function csvCell(v) {
+      const s = String(v == null ? "" : v);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }
+    function exportCsv() {
+      const list = computeSorted();
+      const rows = [CSV_HEADERS.map(h => h[1]).join(",")];
+      list.forEach(r => {
+        const row = CSV_HEADERS.map(h => {
+          const key = h[0];
+          if (key === "status") return status(r);
+          if (key === "progress") return progress(r) + "%";
+          return r[key];
+        });
+        rows.push(row.map(csvCell).join(","));
+      });
+      const bom = "﻿"; // Excelで文字化けしないようBOM付き
+      const blob = new Blob([bom + rows.join("\r\n")], { type: "text/csv;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "在庫管理_" + todayStr() + ".csv";
+      document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    }
+    function parseCsv(text) {
+      if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+      const rows = []; let row = []; let cur = ""; let inQ = false;
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        if (inQ) {
+          if (c === '"') { if (text[i+1] === '"') { cur += '"'; i++; } else inQ = false; }
+          else cur += c;
+        } else {
+          if (c === '"') inQ = true;
+          else if (c === ",") { row.push(cur); cur = ""; }
+          else if (c === "\n") { row.push(cur); rows.push(row); row = []; cur = ""; }
+          else if (c === "\r") { /* skip */ }
+          else cur += c;
+        }
+      }
+      if (cur !== "" || row.length) { row.push(cur); rows.push(row); }
+      return rows.filter(r => r.length && r.some(c => c !== ""));
+    }
+    function importCsv(text) {
+      const rows = parseCsv(text);
+      if (rows.length < 2) { alert("読み込めるデータがありません"); return; }
+      const header = rows[0].map(h => h.trim());
+      // 日本語ヘッダー・英語キーどちらでもマッピング
+      const map = {};
+      header.forEach((h, i) => {
+        const found = CSV_HEADERS.find(x => x[1] === h || x[0] === h);
+        if (found) map[found[0]] = i;
+      });
+      if (map.partNo == null) { alert("「品番」列が見つかりません。書き出したCSVの形式に合わせてください。"); return; }
+      let added = 0;
+      for (let i = 1; i < rows.length; i++) {
+        const r = rows[i];
+        const rec = { id: uid() };
+        FIELDS.forEach(f => { rec[f] = map[f] != null ? (r[map[f]] || "").trim() : ""; });
+        if (!rec.partNo) continue;
+        records.push(rec); added++;
+      }
+      save(); render();
+      alert(added + " 件を追加しました。");
+    }
+
+    // ---- sample ----
+    function loadSample() {
+      if (records.length && !confirm("サンプルデータを追加します。よろしいですか？")) return;
+      const t = new Date();
+      const d = off => { const x = new Date(t); x.setDate(x.getDate() + off); return x.toISOString().slice(0,10); };
+      const sample = [
+        { partNo:"ABC-1000", customer:"山田製作所", orderNo:"PO-2026-001", lot:"L260901", qty:"500", receivedQty:"0",  dueDate:d(-2), manualPriority:"", inPlanDate:d(1),  inActualDate:"",    outPlanDate:"",    outActualDate:"", note:"至急・未入庫" },
+        { partNo:"DEF-2200", customer:"鈴木工業",   orderNo:"PO-2026-002", lot:"L260905", qty:"300", receivedQty:"150",dueDate:d(3),  manualPriority:"1",inPlanDate:d(-3), inActualDate:d(-3), outPlanDate:d(5),  outActualDate:"", note:"分納中" },
+        { partNo:"GHI-3300", customer:"佐藤商事",   orderNo:"PO-2026-003", lot:"L260820", qty:"1000",receivedQty:"1000",dueDate:d(6), manualPriority:"", inPlanDate:d(-6), inActualDate:d(-6), outPlanDate:d(7),  outActualDate:"", note:"入庫完了・出荷待ち" },
+        { partNo:"JKL-4400", customer:"山田製作所", orderNo:"PO-2026-004", lot:"L260812", qty:"200", receivedQty:"200",dueDate:d(-10),manualPriority:"",inPlanDate:d(-12),inActualDate:d(-12),outPlanDate:d(-9), outActualDate:d(-9),note:"出荷済み" },
+        { partNo:"MNO-5500", customer:"高橋精密",   orderNo:"PO-2026-005", lot:"",        qty:"800", receivedQty:"0",  dueDate:d(14), manualPriority:"", inPlanDate:d(10), inActualDate:"",    outPlanDate:"",    outActualDate:"", note:"" },
+      ];
+      sample.forEach(s => { s.id = uid(); records.push(s); });
+      save(); render();
+    }
+
+    // ---- events ----
+    document.getElementById("btnAdd").addEventListener("click", openAdd);
+    document.getElementById("btnSave").addEventListener("click", saveModal);
+    document.getElementById("btnCancel").addEventListener("click", closeModal);
+    document.getElementById("btnDelete").addEventListener("click", deleteRecord);
+    modalBack.addEventListener("click", e => { if (e.target === modalBack) closeModal(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+    ["search","filterStatus","sortMode","hideDone"].forEach(id =>
+      document.getElementById(id).addEventListener("input", render));
+
+    document.getElementById("btnExport").addEventListener("click", exportCsv);
+    document.getElementById("btnImport").addEventListener("click", () => document.getElementById("fileInput").click());
+    document.getElementById("fileInput").addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => importCsv(reader.result);
+      reader.readAsText(file, "utf-8");
+      e.target.value = "";
+    });
+    document.getElementById("btnSample").addEventListener("click", loadSample);
+
+    // ---- init ----
+    load(); render();
+  })();
+  </script>
+</body>
+</html>
