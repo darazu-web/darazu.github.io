@@ -44,6 +44,14 @@
     header.app-header .sub { color: #94a3b8; font-size: 12px; margin-top: 2px; }
     .wrap { padding: 18px 20px 60px; max-width: 1600px; margin: 0 auto; }
 
+    .sample-bar {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      background: var(--warn-bg); border: 1px solid #f0d6a8; color: #8a5a08;
+      border-radius: 10px; padding: 9px 14px; margin-bottom: 14px; font-size: 13px;
+    }
+    .sample-bar button { background: #fff; border-color: #e3c088; color: #8a5a08; }
+    .sample-bar button:hover { background: #fffaf1; }
+
     .cards { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
     .card {
       background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
@@ -204,6 +212,10 @@
   </header>
 
   <div class="wrap">
+    <div class="sample-bar" id="sampleBar" style="display:none">
+      <span>下の <b id="sampleCount">0</b> 件は動作確認用のサンプルです。実データではありません。</span>
+      <button type="button" id="btnClearSample">サンプルを削除</button>
+    </div>
     <div class="cards" id="cards"></div>
 
     <div class="toolbar">
@@ -373,6 +385,8 @@
         records = raw ? JSON.parse(raw) : [];
         if (!Array.isArray(records)) records = [];
       } catch (e) { records = []; }
+      // 初回起動時は中身が空で何も伝わらないため、サンプルを入れた状態で見せる
+      if (raw === null) { records = sampleRecords(); save(); }
       migrate();
     }
     function save() {
@@ -580,6 +594,9 @@
       });
 
       renderCards();
+      var n = records.filter(function (r) { return r._sample; }).length;
+      document.getElementById("sampleBar").style.display = n ? "flex" : "none";
+      document.getElementById("sampleCount").textContent = n;
     }
 
     // 明細テーブル（累計・残を併記して分納の進み具合を把握できるように）
@@ -812,13 +829,23 @@
       var s = String(v == null ? "" : v);
       return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
     }
-    function download(name, text) {
-      var blob = new Blob(["﻿" + text], { type: "text/csv;charset=utf-8" });
-      var url = URL.createObjectURL(blob);
+    function anchorDownload(name, data) {
+      var url = URL.createObjectURL(new Blob([data], { type: "text/csv;charset=utf-8" }));
       var a = document.createElement("a");
       a.href = url; a.download = name;
       document.body.appendChild(a); a.click(); a.remove();
       URL.revokeObjectURL(url);
+    }
+    // 通常のブラウザではaタグで保存。aタグの保存が禁止された環境では保存機能に委譲する
+    function download(name, text) {
+      var data = "﻿" + text;
+      if (!window.claude || typeof window.claude.use !== "function") { anchorDownload(name, data); return; }
+      window.claude.use("downloads").then(function (d) {
+        if (!d) { anchorDownload(name, data); return; }
+        return d.save({ filename: name, data: data }).catch(function (err) {
+          if (!err || err.code !== "declined") anchorDownload(name, data);
+        });
+      }).catch(function () { anchorDownload(name, data); });
     }
     function exportCsv() {
       var list = computeSorted();
@@ -914,6 +941,15 @@
     // ---------- sample ----------
     function loadSample() {
       if (records.length && !confirm("サンプルデータを追加します。よろしいですか？")) return;
+      sampleRecords().forEach(function (s) { records.push(s); });
+      save(); render();
+    }
+    function clearSample() {
+      if (!confirm("サンプルデータを削除します。よろしいですか？")) return;
+      records = records.filter(function (r) { return !r._sample; });
+      save(); render();
+    }
+    function sampleRecords() {
       var t = new Date();
       var d = function (off) { var x = new Date(t); x.setDate(x.getDate() + off); return new Date(x.getTime() - x.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
       var sample = [
@@ -928,8 +964,8 @@
         { partNo: "MNO-5500", customer: "高橋精密", orderNo: "PO-2026-005", lot: "", qty: "800", dueDate: d(14), manualPriority: "", inPlanDate: d(10), outPlanDate: d(12), note: "分割出荷中",
           receipts: [{ date: d(-4), qty: 800, lot: "L260907", note: "" }], shipments: [{ date: d(-1), qty: 300, lot: "L260907", note: "先行出荷分" }] }
       ];
-      sample.forEach(function (s) { s.id = uid(); records.push(s); });
-      save(); render();
+      sample.forEach(function (s) { s.id = uid(); s._sample = true; });
+      return sample;
     }
 
     // ---------- events ----------
@@ -959,6 +995,7 @@
       e.target.value = "";
     });
     document.getElementById("btnSample").addEventListener("click", loadSample);
+    document.getElementById("btnClearSample").addEventListener("click", clearSample);
 
     load(); render();
   })();

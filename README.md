@@ -4,7 +4,12 @@
 
 `inventory.html` … 入庫・出庫の進捗と、顧客からの要望納期・優先順位を一元管理する単一ページアプリです。**分納（複数回入庫・複数回出庫）に対応**しています。
 
-公開URL: https://darazu-web.github.io/inventory.html
+公開URL（GitHub Pages を有効化し、main ブランチから配信している場合）:
+https://darazu-web.github.io/darazu.github.io/inventory.html
+
+> このリポジトリは `darazu-web/darazu.github.io` で、オーナー名とリポジトリ名が一致しないため
+> ユーザーサイト（`https://darazu-web.github.io/`）ではなく**プロジェクトサイト**として配信されます。
+> URL にリポジトリ名が1階層入る点に注意してください。
 
 ### 主な機能
 
