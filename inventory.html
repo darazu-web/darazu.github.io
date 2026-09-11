@@ -42,24 +42,23 @@
     }
     header.app-header h1 { font-size: 17px; margin: 0; font-weight: 600; letter-spacing: .02em; }
     header.app-header .sub { color: #94a3b8; font-size: 12px; margin-top: 2px; }
-    .wrap { padding: 18px 20px 60px; max-width: 1500px; margin: 0 auto; }
+    .wrap { padding: 18px 20px 60px; max-width: 1600px; margin: 0 auto; }
 
-    /* summary cards */
     .cards { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; }
     .card {
       background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
-      padding: 12px 16px; min-width: 120px; flex: 1 1 120px; box-shadow: var(--shadow);
+      padding: 12px 16px; min-width: 110px; flex: 1 1 110px; box-shadow: var(--shadow);
     }
     .card .label { font-size: 12px; color: var(--muted); }
     .card .num { font-size: 24px; font-weight: 700; margin-top: 2px; }
-    .card.mikonyuko { border-left: 4px solid #94a3b8; }
-    .card.ichibu { border-left: 4px solid var(--warn); }
-    .card.kanryo { border-left: 4px solid var(--ok); }
-    .card.shukko { border-left: 4px solid var(--accent); }
-    .card.chien { border-left: 4px solid var(--danger); }
-    .card.chien .num { color: var(--danger); }
+    .card.c-mikonyuko { border-left: 4px solid #94a3b8; }
+    .card.c-ichibu { border-left: 4px solid var(--warn); }
+    .card.c-kanryo { border-left: 4px solid var(--ok); }
+    .card.c-ichibushukko { border-left: 4px solid #0ea5e9; }
+    .card.c-shukko { border-left: 4px solid var(--accent); }
+    .card.c-chien { border-left: 4px solid var(--danger); }
+    .card.c-chien .num { color: var(--danger); }
 
-    /* toolbar */
     .toolbar {
       display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
       background: var(--panel); border: 1px solid var(--border); border-radius: 10px;
@@ -83,70 +82,113 @@
     button.danger:hover { background: var(--danger-bg); }
     label.check { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); cursor: pointer; }
 
-    /* table */
     .table-wrap { background: var(--panel); border: 1px solid var(--border); border-radius: 10px; overflow-x: auto; box-shadow: var(--shadow); }
-    table { border-collapse: collapse; width: 100%; min-width: 1180px; font-size: 13px; }
-    thead th {
-      position: sticky; top: 0; background: #f8fafc; color: var(--muted);
+    table.main { border-collapse: collapse; width: 100%; min-width: 1560px; font-size: 13px; }
+    table.main > thead th {
+      position: sticky; top: 0; background: #f8fafc; color: var(--muted); z-index: 2;
       text-align: left; font-weight: 600; padding: 9px 10px; border-bottom: 2px solid var(--border);
       white-space: nowrap; font-size: 12px;
     }
-    tbody td { padding: 8px 10px; border-bottom: 1px solid #eef1f4; vertical-align: middle; white-space: nowrap; }
-    tbody tr:hover { background: #f8fbff; }
+    table.main > tbody > tr > td { padding: 8px 10px; border-bottom: 1px solid #eef1f4; vertical-align: middle; white-space: nowrap; }
+    tr.data-row:hover { background: #f8fbff; }
     tr.done { color: var(--muted); background: #fbfcfd; }
     tr.overdue td.due { color: var(--danger); font-weight: 700; }
     tr.soon td.due { color: var(--warn); font-weight: 600; }
-    td.num-col { text-align: right; font-variant-numeric: tabular-nums; }
+    td.num-col, th.num-col { text-align: right; font-variant-numeric: tabular-nums; }
     .part { font-weight: 600; }
+    .zan { color: var(--danger); font-weight: 600; }
+    .zan.zero { color: var(--muted); font-weight: 400; }
+    .times { color: var(--muted); font-size: 11px; margin-left: 3px; }
 
     .badge { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 600; white-space: nowrap; }
     .badge.s-mikonyuko { background: #eef1f4; color: #52606d; }
     .badge.s-ichibu { background: var(--warn-bg); color: var(--warn); }
     .badge.s-kanryo { background: var(--ok-bg); color: var(--ok); }
+    .badge.s-ichibushukko { background: #e0f2fe; color: #0369a1; }
     .badge.s-shukko { background: #e6effe; color: var(--accent); }
 
-    /* progress bar */
-    .prog { display: flex; align-items: center; gap: 7px; min-width: 110px; }
-    .prog .track { flex: 1; height: 7px; background: #eef1f4; border-radius: 999px; overflow: hidden; }
-    .prog .fill { height: 100%; background: var(--ok); border-radius: 999px; }
-    .prog .pct { font-size: 11.5px; color: var(--muted); min-width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+    .prog { min-width: 132px; }
+    .prog .line { display: flex; align-items: center; gap: 6px; }
+    .prog .line + .line { margin-top: 3px; }
+    .prog .tag { font-size: 10.5px; color: var(--muted); width: 20px; flex: none; }
+    .prog .track { flex: 1; height: 6px; background: #eef1f4; border-radius: 999px; overflow: hidden; }
+    .prog .fill { height: 100%; border-radius: 999px; }
+    .prog .fill.in { background: var(--ok); }
+    .prog .fill.out { background: var(--accent); }
+    .prog .pct { font-size: 10.5px; color: var(--muted); min-width: 32px; text-align: right; font-variant-numeric: tabular-nums; }
 
     .pri-cell { display: flex; align-items: center; gap: 2px; }
     .pri-cell .rank { min-width: 20px; text-align: center; font-weight: 700; font-variant-numeric: tabular-nums; }
     .pri-cell button { padding: 0 5px; font-size: 12px; line-height: 20px; border-radius: 5px; }
-    .row-actions button { padding: 4px 9px; font-size: 12px; margin-right: 4px; }
+    .row-actions { white-space: nowrap; }
+    .row-actions button { padding: 4px 8px; font-size: 12px; margin-right: 3px; }
+    .row-actions button.in { color: var(--ok); border-color: #b9e2cf; }
+    .row-actions button.in:hover { background: var(--ok-bg); }
+    .row-actions button.out { color: var(--accent); border-color: #c3d6fb; }
+    .row-actions button.out:hover { background: #eef4ff; }
     .flag { color: var(--danger); font-weight: 700; margin-left: 3px; }
+    .exp-btn { border: none; background: none; padding: 2px 4px; font-size: 12px; color: var(--muted); }
+    .exp-btn:hover { background: #eef1f4; }
+
+    /* detail (分納明細) */
+    tr.detail-row > td { background: #f8fafc; padding: 0 !important; border-bottom: 1px solid var(--border); white-space: normal !important; }
+    .detail-inner { display: flex; gap: 22px; flex-wrap: wrap; padding: 14px 18px 16px 40px; }
+    .hist-block { flex: 1 1 380px; min-width: 320px; }
+    .hist-block h4 { margin: 0 0 7px; font-size: 12.5px; color: var(--muted); font-weight: 700; }
+    .hist-block h4 .sum { color: var(--text); margin-left: 6px; font-weight: 600; }
+    table.hist { border-collapse: collapse; width: 100%; font-size: 12px; background: #fff; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+    table.hist th { background: #eef2f6; color: var(--muted); text-align: left; font-weight: 600; padding: 5px 8px; white-space: nowrap; }
+    table.hist td { padding: 5px 8px; border-top: 1px solid #eef1f4; white-space: nowrap; }
+    table.hist td.num-col { text-align: right; font-variant-numeric: tabular-nums; }
+    .hist-none { font-size: 12px; color: var(--muted); padding: 8px 10px; background: #fff; border: 1px dashed var(--border); border-radius: 6px; }
 
     .empty { padding: 48px 20px; text-align: center; color: var(--muted); }
 
     /* modal */
     .modal-back {
       position: fixed; inset: 0; background: rgba(15, 23, 42, .45);
-      display: none; align-items: flex-start; justify-content: center; padding: 30px 14px; z-index: 50; overflow-y: auto;
+      display: none; align-items: flex-start; justify-content: center; padding: 24px 14px; z-index: 50; overflow-y: auto;
     }
     .modal-back.open { display: flex; }
     .modal {
-      background: #fff; border-radius: 12px; width: 100%; max-width: 640px; padding: 22px 24px 24px;
+      background: #fff; border-radius: 12px; width: 100%; max-width: 820px; padding: 22px 24px 24px;
       box-shadow: 0 20px 40px rgba(0,0,0,.25);
     }
     .modal h2 { margin: 0 0 16px; font-size: 17px; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 16px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px 16px; }
     .field { display: flex; flex-direction: column; gap: 4px; }
     .field.full { grid-column: 1 / -1; }
     .field label { font-size: 12px; color: var(--muted); font-weight: 600; }
     .field label .req { color: var(--danger); }
     .field input, .field textarea {
-      padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; font-size: 14px; font-family: inherit; color: var(--text);
+      padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; font-size: 14px; font-family: inherit; color: var(--text); width: 100%;
     }
     .field input:focus, .field textarea:focus { outline: 2px solid #bfd4fb; border-color: var(--accent); }
     .field .hint { font-size: 11px; color: var(--muted); }
+
+    .sec { grid-column: 1 / -1; margin-top: 6px; border-top: 1px solid var(--border); padding-top: 14px; }
+    .sec-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; margin-bottom: 7px; }
+    .sec-head .t { font-size: 13px; font-weight: 700; }
+    .sec-head .t .note { font-weight: 400; color: var(--muted); font-size: 11.5px; margin-left: 6px; }
+    .sec-sum { font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+    .sec-sum b { color: var(--text); }
+    .sec-sum.over { color: var(--warn); font-weight: 600; }
+    table.edit-hist { border-collapse: collapse; width: 100%; font-size: 13px; }
+    table.edit-hist th { text-align: left; font-size: 11px; color: var(--muted); font-weight: 600; padding: 0 6px 4px 0; }
+    table.edit-hist td { padding: 0 6px 6px 0; vertical-align: top; }
+    table.edit-hist input { padding: 6px 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; font-family: inherit; width: 100%; color: var(--text); }
+    table.edit-hist .col-del { width: 30px; }
+    table.edit-hist .h-del { padding: 5px 8px; color: var(--danger); border-color: #f0c4c4; line-height: 1; }
+    .hist-empty { font-size: 12px; color: var(--muted); padding: 6px 0 2px; }
+
     .modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
     .modal-actions .spacer { flex: 1; }
 
-    @media (max-width: 600px) {
+    @media (max-width: 760px) {
       .form-grid { grid-template-columns: 1fr; }
       .wrap { padding: 14px 12px 50px; }
       header.app-header { padding: 12px 14px; }
+      .detail-inner { padding: 12px; }
     }
   </style>
 </head>
@@ -154,7 +196,7 @@
   <header class="app-header">
     <div>
       <h1>入出庫・納期管理</h1>
-      <div class="sub">品番・数量・要望納期・在庫進捗を一元管理 ／ 未入庫を含めて優先順位を把握</div>
+      <div class="sub">品番・数量・要望納期・在庫進捗を一元管理 ／ 分納（複数回入庫・複数回出庫）対応</div>
     </div>
     <div>
       <button class="primary" id="btnAdd">＋ 新規登録</button>
@@ -171,6 +213,7 @@
         <option value="未入庫">未入庫</option>
         <option value="一部入庫">一部入庫</option>
         <option value="入庫完了">入庫完了</option>
+        <option value="一部出庫">一部出庫</option>
         <option value="出庫済">出庫済</option>
       </select>
       <select id="sortMode">
@@ -180,17 +223,20 @@
         <option value="customer">並び順：顧客名</option>
       </select>
       <label class="check"><input type="checkbox" id="hideDone"> 出庫済を隠す</label>
+      <label class="check"><input type="checkbox" id="expandAll"> 明細を全て開く</label>
       <span class="spacer"></span>
       <button id="btnImport">CSV読込</button>
       <button id="btnExport">CSV書出</button>
+      <button id="btnExportDetail">明細CSV書出</button>
       <button id="btnSample">サンプル投入</button>
       <input type="file" id="fileInput" accept=".csv,text/csv" style="display:none">
     </div>
 
     <div class="table-wrap">
-      <table>
+      <table class="main">
         <thead>
           <tr>
+            <th></th>
             <th>優先</th>
             <th>状態</th>
             <th>品番</th>
@@ -198,12 +244,14 @@
             <th>注文/管理番号</th>
             <th class="num-col">数量</th>
             <th class="num-col">入庫済</th>
-            <th>在庫進捗</th>
+            <th class="num-col">入庫残</th>
+            <th class="num-col">出庫済</th>
+            <th>進捗</th>
             <th>要望納期</th>
             <th>入庫予定</th>
-            <th>入庫実績</th>
+            <th>最終入庫</th>
             <th>出庫予定</th>
-            <th>出庫実績</th>
+            <th>最終出庫</th>
             <th>LOT番号</th>
             <th>備考</th>
             <th>操作</th>
@@ -235,17 +283,8 @@
           <input id="f_orderNo" type="text" placeholder="例）PO-2026-001">
         </div>
         <div class="field">
-          <label>LOT番号</label>
-          <input id="f_lot" type="text" placeholder="例）L240911">
-        </div>
-        <div class="field">
-          <label>数量 <span class="req">*</span></label>
+          <label>数量（受注総数） <span class="req">*</span></label>
           <input id="f_qty" type="number" min="0" step="1" placeholder="0">
-        </div>
-        <div class="field">
-          <label>入庫済数量</label>
-          <input id="f_receivedQty" type="number" min="0" step="1" placeholder="0">
-          <span class="hint">数量に達すると自動で「入庫完了」になります</span>
         </div>
         <div class="field">
           <label>要望納期 <span class="req">*</span></label>
@@ -253,31 +292,59 @@
         </div>
         <div class="field">
           <label>手動優先度</label>
-          <input id="f_manualPriority" type="number" min="1" step="1" placeholder="空欄=納期順で自動">
+          <input id="f_manualPriority" type="number" min="1" step="1" placeholder="空欄=納期順">
           <span class="hint">小さいほど上位。空欄なら納期順</span>
         </div>
         <div class="field">
           <label>入庫予定日</label>
           <input id="f_inPlanDate" type="date">
-        </div>
-        <div class="field">
-          <label>入庫実績日</label>
-          <input id="f_inActualDate" type="date">
+          <span class="hint">次回入庫の予定日</span>
         </div>
         <div class="field">
           <label>出庫予定日</label>
           <input id="f_outPlanDate" type="date">
+          <span class="hint">次回出庫の予定日</span>
         </div>
         <div class="field">
-          <label>出庫実績日</label>
-          <input id="f_outActualDate" type="date">
-          <span class="hint">入力すると「出庫済」になります</span>
+          <label>LOT番号（代表）</label>
+          <input id="f_lot" type="text" placeholder="例）L260911">
         </div>
         <div class="field full">
           <label>備考</label>
           <textarea id="f_note" rows="2" placeholder="連絡事項・特記事項など"></textarea>
         </div>
+
+        <div class="sec">
+          <div class="sec-head">
+            <div class="t">入庫履歴（分納）<span class="note">1回の入庫ごとに1行。日付・数量・LOTを分けて記録できます</span></div>
+            <div class="sec-sum" id="sumReceipts"></div>
+          </div>
+          <table class="edit-hist">
+            <thead>
+              <tr><th style="width:24%">入庫日</th><th style="width:16%">数量</th><th style="width:22%">LOT番号</th><th>備考</th><th class="col-del"></th></tr>
+            </thead>
+            <tbody id="h_receipts"></tbody>
+          </table>
+          <div class="hist-empty" id="emptyReceipts">入庫の記録はまだありません。</div>
+          <button type="button" id="btnAddReceipt" style="margin-top:6px">＋ 入庫を追加</button>
+        </div>
+
+        <div class="sec">
+          <div class="sec-head">
+            <div class="t">出庫履歴（分割出荷）<span class="note">1回の出庫ごとに1行</span></div>
+            <div class="sec-sum" id="sumShipments"></div>
+          </div>
+          <table class="edit-hist">
+            <thead>
+              <tr><th style="width:24%">出庫日</th><th style="width:16%">数量</th><th style="width:22%">LOT番号</th><th>備考</th><th class="col-del"></th></tr>
+            </thead>
+            <tbody id="h_shipments"></tbody>
+          </table>
+          <div class="hist-empty" id="emptyShipments">出庫の記録はまだありません。</div>
+          <button type="button" id="btnAddShipment" style="margin-top:6px">＋ 出庫を追加</button>
+        </div>
       </div>
+
       <div class="modal-actions">
         <button class="danger" id="btnDelete" style="display:none">削除</button>
         <span class="spacer"></span>
@@ -290,19 +357,23 @@
   <script>
   (function () {
     "use strict";
-    const STORAGE_KEY = "darazu_inventory_v1";
-    const FIELDS = ["partNo","customer","orderNo","lot","qty","receivedQty","dueDate","manualPriority","inPlanDate","inActualDate","outPlanDate","outActualDate","note"];
+    var STORAGE_KEY = "darazu_inventory_v1";
+    // 明細（入庫履歴/出庫履歴）を除いた、レコード直下の項目
+    var FIELDS = ["partNo","customer","orderNo","lot","qty","dueDate","manualPriority","inPlanDate","outPlanDate","note"];
+    var FAR = "9999-12-31";
 
-    // ---- state ----
-    let records = [];
-    let editingId = null;
+    var records = [];
+    var editingId = null;
+    var expanded = {};   // id -> true（明細を開いている行）
 
+    // ---------- storage ----------
     function load() {
       try {
-        const raw = localStorage.getItem(STORAGE_KEY);
+        var raw = localStorage.getItem(STORAGE_KEY);
         records = raw ? JSON.parse(raw) : [];
         if (!Array.isArray(records)) records = [];
       } catch (e) { records = []; }
+      migrate();
     }
     function save() {
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(records)); }
@@ -310,103 +381,153 @@
     }
     function uid() { return "r" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
 
-    // ---- derived ----
+    // 旧フォーマット（受入数量1つ＋実績日1つ）を分納フォーマットへ移行
+    function migrate() {
+      var changed = false;
+      records.forEach(function (r) {
+        if (!Array.isArray(r.receipts)) {
+          r.receipts = [];
+          var rq = Number(r.receivedQty) || 0;
+          if (rq > 0) r.receipts.push({ date: r.inActualDate || "", qty: rq, lot: r.lot || "", note: "旧データから移行" });
+          changed = true;
+        }
+        if (!Array.isArray(r.shipments)) {
+          r.shipments = [];
+          if (r.outActualDate) r.shipments.push({ date: r.outActualDate, qty: Number(r.qty) || 0, lot: r.lot || "", note: "旧データから移行" });
+          changed = true;
+        }
+        if ("receivedQty" in r || "inActualDate" in r || "outActualDate" in r) {
+          delete r.receivedQty; delete r.inActualDate; delete r.outActualDate;
+          changed = true;
+        }
+      });
+      if (changed) save();
+    }
+
+    // ---------- derived ----------
+    function num(v) { return Number(v) || 0; }
+    function fmt(v) { return num(v).toLocaleString(); }
+    function sumQty(arr) { return (arr || []).reduce(function (a, h) { return a + num(h.qty); }, 0); }
+    function receivedQty(r) { return sumQty(r.receipts); }
+    function shippedQty(r) { return sumQty(r.shipments); }
+    function byDate(a, b) { return (a.date || FAR).localeCompare(b.date || FAR); }
+    function sortedHist(arr) { return (arr || []).slice().sort(byDate); }
+    function lastDate(arr) {
+      var ds = (arr || []).map(function (h) { return h.date; }).filter(Boolean).sort();
+      return ds.length ? ds[ds.length - 1] : "";
+    }
+
     function status(r) {
-      if (r.outActualDate) return "出庫済";
-      const qty = Number(r.qty) || 0;
-      const rec = Number(r.receivedQty) || 0;
+      var qty = num(r.qty), rec = receivedQty(r), shp = shippedQty(r);
+      if (qty > 0 && shp >= qty) return "出庫済";
+      if (shp > 0) return "一部出庫";
       if (qty > 0 && rec >= qty) return "入庫完了";
       if (rec > 0) return "一部入庫";
       return "未入庫";
     }
-    function progress(r) {
-      if (status(r) === "出庫済") return 100;
-      const qty = Number(r.qty) || 0;
-      const rec = Number(r.receivedQty) || 0;
-      if (qty <= 0) return 0;
-      return Math.min(100, Math.round(rec / qty * 100));
+    function inPct(r) {
+      var qty = num(r.qty);
+      return qty <= 0 ? 0 : Math.min(100, Math.round(receivedQty(r) / qty * 100));
     }
-    function isActive(r) { const s = status(r); return s !== "出庫済"; }
-    function todayStr() { return new Date().toISOString().slice(0, 10); }
+    function outPct(r) {
+      var qty = num(r.qty);
+      return qty <= 0 ? 0 : Math.min(100, Math.round(shippedQty(r) / qty * 100));
+    }
+    function isActive(r) { return status(r) !== "出庫済"; }
+    function todayStr() {
+      var d = new Date();
+      return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+    }
     function daysUntil(dateStr) {
       if (!dateStr) return null;
-      const d = new Date(dateStr + "T00:00:00");
-      const t = new Date(todayStr() + "T00:00:00");
-      return Math.round((d - t) / 86400000);
+      return Math.round((new Date(dateStr + "T00:00:00") - new Date(todayStr() + "T00:00:00")) / 86400000);
+    }
+    function esc(s) {
+      return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) {
+        return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+      });
     }
 
-    // ---- rendering ----
-    const STATUS_CLASS = { "未入庫":"s-mikonyuko", "一部入庫":"s-ichibu", "入庫完了":"s-kanryo", "出庫済":"s-shukko" };
-
+    // ---------- filtering / sorting ----------
     function computeSorted() {
-      const mode = document.getElementById("sortMode").value;
-      const search = document.getElementById("search").value.trim().toLowerCase();
-      const fStatus = document.getElementById("filterStatus").value;
-      const hideDone = document.getElementById("hideDone").checked;
+      var mode = document.getElementById("sortMode").value;
+      var search = document.getElementById("search").value.trim().toLowerCase();
+      var fStatus = document.getElementById("filterStatus").value;
+      var hideDone = document.getElementById("hideDone").checked;
 
-      let list = records.filter(r => {
+      var list = records.filter(function (r) {
         if (hideDone && status(r) === "出庫済") return false;
         if (fStatus && status(r) !== fStatus) return false;
         if (search) {
-          const hay = [r.partNo, r.customer, r.orderNo, r.lot, r.note].join(" ").toLowerCase();
-          if (!hay.includes(search)) return false;
+          var lots = (r.receipts || []).concat(r.shipments || []).map(function (h) { return h.lot; }).join(" ");
+          var hay = [r.partNo, r.customer, r.orderNo, r.lot, r.note, lots].join(" ").toLowerCase();
+          if (hay.indexOf(search) === -1) return false;
         }
         return true;
       });
 
-      const farFuture = "9999-12-31";
       if (mode === "part") {
-        list.sort((a, b) => (a.partNo || "").localeCompare(b.partNo || "", "ja"));
+        list.sort(function (a, b) { return (a.partNo || "").localeCompare(b.partNo || "", "ja"); });
       } else if (mode === "customer") {
-        list.sort((a, b) => (a.customer || "").localeCompare(b.customer || "", "ja"));
+        list.sort(function (a, b) { return (a.customer || "").localeCompare(b.customer || "", "ja"); });
       } else if (mode === "due") {
-        list.sort((a, b) => (a.dueDate || farFuture).localeCompare(b.dueDate || farFuture));
-      } else { // priority: 完了は下、手動優先度→納期
-        list.sort((a, b) => {
-          const aDone = status(a) === "出庫済" ? 1 : 0;
-          const bDone = status(b) === "出庫済" ? 1 : 0;
+        list.sort(function (a, b) { return (a.dueDate || FAR).localeCompare(b.dueDate || FAR); });
+      } else {
+        list.sort(function (a, b) {
+          var aDone = status(a) === "出庫済" ? 1 : 0;
+          var bDone = status(b) === "出庫済" ? 1 : 0;
           if (aDone !== bDone) return aDone - bDone;
-          const aM = a.manualPriority ? Number(a.manualPriority) : Infinity;
-          const bM = b.manualPriority ? Number(b.manualPriority) : Infinity;
+          var aM = a.manualPriority ? Number(a.manualPriority) : Infinity;
+          var bM = b.manualPriority ? Number(b.manualPriority) : Infinity;
           if (aM !== bM) return aM - bM;
-          return (a.dueDate || farFuture).localeCompare(b.dueDate || farFuture);
+          return (a.dueDate || FAR).localeCompare(b.dueDate || FAR);
         });
       }
       return list;
     }
 
-    function esc(s) {
-      return String(s == null ? "" : s).replace(/[&<>"]/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;" }[c]));
-    }
+    // ---------- render ----------
+    var STATUS_CLASS = {
+      "未入庫": "s-mikonyuko", "一部入庫": "s-ichibu", "入庫完了": "s-kanryo",
+      "一部出庫": "s-ichibushukko", "出庫済": "s-shukko"
+    };
+    var COLSPAN = 19;
 
     function render() {
-      const list = computeSorted();
-      const tbody = document.getElementById("tbody");
-      const empty = document.getElementById("empty");
+      var list = computeSorted();
+      var tbody = document.getElementById("tbody");
+      var showPriMode = document.getElementById("sortMode").value === "priority";
+      var expandAll = document.getElementById("expandAll").checked;
       tbody.innerHTML = "";
-      empty.style.display = records.length === 0 ? "block" : "none";
+      document.getElementById("empty").style.display = records.length === 0 ? "block" : "none";
 
-      const showPriMode = document.getElementById("sortMode").value === "priority";
+      list.forEach(function (r, idx) {
+        var s = status(r);
+        var qty = num(r.qty), rec = receivedQty(r), shp = shippedQty(r);
+        var zanIn = Math.max(0, qty - rec);
+        var du = daysUntil(r.dueDate);
+        var active = isActive(r);
+        var open = expandAll || !!expanded[r.id];
 
-      list.forEach((r, idx) => {
-        const s = status(r);
-        const p = progress(r);
-        const du = daysUntil(r.dueDate);
-        const active = isActive(r);
-        let rowClass = "";
-        if (s === "出庫済") rowClass = "done";
-        else if (du !== null && du < 0) rowClass = "overdue";
-        else if (du !== null && du <= 7) rowClass = "soon";
+        var rowClass = "data-row";
+        if (s === "出庫済") rowClass += " done";
+        else if (du !== null && du < 0) rowClass += " overdue";
+        else if (du !== null && du <= 7) rowClass += " soon";
 
-        const tr = document.createElement("tr");
+        var dueLabel = r.dueDate
+          ? esc(r.dueDate) + (active && du !== null
+              ? (du < 0 ? " (" + (-du) + "日超過)" : du === 0 ? " (本日)" : " (残" + du + "日)")
+              : "")
+          : "";
+        var nIn = (r.receipts || []).length, nOut = (r.shipments || []).length;
+
+        var tr = document.createElement("tr");
         tr.className = rowClass;
-        const rankDisplay = showPriMode ? (idx + 1) : "–";
-        const dueLabel = r.dueDate ? esc(r.dueDate) + (active && du !== null ? (du < 0 ? " (" + (-du) + "日超過)" : du === 0 ? " (本日)" : " (残" + du + "日)") : "") : "";
-
         tr.innerHTML =
+          '<td><button class="exp-btn" data-act="exp" title="分納明細">' + (open ? "▾" : "▸") + '</button></td>' +
           '<td><div class="pri-cell">' +
             '<button data-act="up" title="上へ">▲</button>' +
-            '<span class="rank">' + rankDisplay + '</span>' +
+            '<span class="rank">' + (showPriMode ? (idx + 1) : "–") + '</span>' +
             '<button data-act="down" title="下へ">▼</button>' +
             (r.manualPriority ? '<span class="flag" title="手動優先度 ' + esc(r.manualPriority) + '">★</span>' : '') +
           '</div></td>' +
@@ -414,101 +535,234 @@
           '<td class="part">' + esc(r.partNo) + '</td>' +
           '<td>' + esc(r.customer) + '</td>' +
           '<td>' + esc(r.orderNo) + '</td>' +
-          '<td class="num-col">' + (Number(r.qty) || 0).toLocaleString() + '</td>' +
-          '<td class="num-col">' + (Number(r.receivedQty) || 0).toLocaleString() + '</td>' +
-          '<td><div class="prog"><div class="track"><div class="fill" style="width:' + p + '%"></div></div><span class="pct">' + p + '%</span></div></td>' +
+          '<td class="num-col">' + fmt(qty) + '</td>' +
+          '<td class="num-col">' + fmt(rec) + (nIn > 1 ? '<span class="times">' + nIn + '回</span>' : '') + '</td>' +
+          '<td class="num-col"><span class="zan' + (zanIn === 0 ? ' zero' : '') + '">' + fmt(zanIn) + '</span></td>' +
+          '<td class="num-col">' + fmt(shp) + (nOut > 1 ? '<span class="times">' + nOut + '回</span>' : '') + '</td>' +
+          '<td><div class="prog">' +
+            '<div class="line"><span class="tag">入</span><span class="track"><span class="fill in" style="width:' + inPct(r) + '%"></span></span><span class="pct">' + inPct(r) + '%</span></div>' +
+            '<div class="line"><span class="tag">出</span><span class="track"><span class="fill out" style="width:' + outPct(r) + '%"></span></span><span class="pct">' + outPct(r) + '%</span></div>' +
+          '</div></td>' +
           '<td class="due">' + dueLabel + '</td>' +
           '<td>' + esc(r.inPlanDate) + '</td>' +
-          '<td>' + esc(r.inActualDate) + '</td>' +
+          '<td>' + esc(lastDate(r.receipts)) + '</td>' +
           '<td>' + esc(r.outPlanDate) + '</td>' +
-          '<td>' + esc(r.outActualDate) + '</td>' +
+          '<td>' + esc(lastDate(r.shipments)) + '</td>' +
           '<td>' + esc(r.lot) + '</td>' +
           '<td>' + esc(r.note) + '</td>' +
-          '<td class="row-actions"><button data-act="edit">編集</button></td>';
+          '<td class="row-actions">' +
+            '<button class="in" data-act="addin" title="入庫を記録">＋入庫</button>' +
+            '<button class="out" data-act="addout" title="出庫を記録">＋出庫</button>' +
+            '<button data-act="edit">編集</button>' +
+          '</td>';
 
-        tr.querySelector('[data-act=edit]').addEventListener("click", () => openEdit(r.id));
-        tr.querySelector('[data-act=up]').addEventListener("click", () => nudge(r.id, -1));
-        tr.querySelector('[data-act=down]').addEventListener("click", () => nudge(r.id, 1));
+        tr.querySelector('[data-act=edit]').addEventListener("click", function () { openEdit(r.id); });
+        tr.querySelector('[data-act=addin]').addEventListener("click", function () { openEdit(r.id, "receipt"); });
+        tr.querySelector('[data-act=addout]').addEventListener("click", function () { openEdit(r.id, "shipment"); });
+        tr.querySelector('[data-act=up]').addEventListener("click", function () { nudge(r.id, -1); });
+        tr.querySelector('[data-act=down]').addEventListener("click", function () { nudge(r.id, 1); });
+        tr.querySelector('[data-act=exp]').addEventListener("click", function () {
+          if (expanded[r.id]) delete expanded[r.id]; else expanded[r.id] = true;
+          document.getElementById("expandAll").checked = false;
+          render();
+        });
         tbody.appendChild(tr);
+
+        if (open) {
+          var dtr = document.createElement("tr");
+          dtr.className = "detail-row";
+          dtr.innerHTML = '<td colspan="' + COLSPAN + '"><div class="detail-inner">' +
+            histBlockHtml("入庫履歴", r.receipts, qty, "入庫日") +
+            histBlockHtml("出庫履歴", r.shipments, qty, "出庫日") +
+            '</div></td>';
+          tbody.appendChild(dtr);
+        }
       });
 
       renderCards();
     }
 
-    function renderCards() {
-      const counts = { "未入庫":0, "一部入庫":0, "入庫完了":0, "出庫済":0 };
-      let overdue = 0;
-      records.forEach(r => {
-        counts[status(r)]++;
-        if (isActive(r)) { const du = daysUntil(r.dueDate); if (du !== null && du < 0) overdue++; }
-      });
-      const cards = [
-        { cls: "chien", label: "納期超過(未完了)", num: overdue },
-        { cls: "mikonyuko", label: "未入庫", num: counts["未入庫"] },
-        { cls: "ichibu", label: "一部入庫", num: counts["一部入庫"] },
-        { cls: "kanryo", label: "入庫完了", num: counts["入庫完了"] },
-        { cls: "shukko", label: "出庫済", num: counts["出庫済"] },
-      ];
-      document.getElementById("cards").innerHTML = cards.map(c =>
-        '<div class="card ' + c.cls + '"><div class="label">' + c.label + '</div><div class="num">' + c.num + '</div></div>'
-      ).join("");
+    // 明細テーブル（累計・残を併記して分納の進み具合を把握できるように）
+    function histBlockHtml(title, arr, qty, dateLabel) {
+      var list = sortedHist(arr);
+      var total = sumQty(list);
+      var head = '<h4>' + title + '<span class="sum">' + fmt(total) + ' / ' + fmt(qty) + '（残 ' + fmt(Math.max(0, qty - total)) + '）</span></h4>';
+      if (!list.length) return '<div class="hist-block">' + head + '<div class="hist-none">記録なし</div></div>';
+      var run = 0;
+      var rows = list.map(function (h, i) {
+        run += num(h.qty);
+        return '<tr>' +
+          '<td>' + (i + 1) + '</td>' +
+          '<td>' + esc(h.date) + '</td>' +
+          '<td class="num-col">' + fmt(h.qty) + '</td>' +
+          '<td class="num-col">' + fmt(run) + '</td>' +
+          '<td class="num-col">' + fmt(Math.max(0, qty - run)) + '</td>' +
+          '<td>' + esc(h.lot) + '</td>' +
+          '<td>' + esc(h.note) + '</td>' +
+        '</tr>';
+      }).join("");
+      return '<div class="hist-block">' + head +
+        '<table class="hist"><thead><tr><th>#</th><th>' + dateLabel + '</th>' +
+        '<th class="num-col">数量</th><th class="num-col">累計</th><th class="num-col">残</th><th>LOT番号</th><th>備考</th></tr></thead>' +
+        '<tbody>' + rows + '</tbody></table></div>';
     }
 
-    // ---- manual priority nudge ----
-    // 表示中の並び順で前後と入れ替えるように手動優先度を振り直す
+    function renderCards() {
+      var counts = { "未入庫": 0, "一部入庫": 0, "入庫完了": 0, "一部出庫": 0, "出庫済": 0 };
+      var overdue = 0;
+      records.forEach(function (r) {
+        counts[status(r)]++;
+        if (isActive(r)) { var du = daysUntil(r.dueDate); if (du !== null && du < 0) overdue++; }
+      });
+      var cards = [
+        { cls: "c-chien", label: "納期超過(未完了)", num: overdue },
+        { cls: "c-mikonyuko", label: "未入庫", num: counts["未入庫"] },
+        { cls: "c-ichibu", label: "一部入庫", num: counts["一部入庫"] },
+        { cls: "c-kanryo", label: "入庫完了", num: counts["入庫完了"] },
+        { cls: "c-ichibushukko", label: "一部出庫", num: counts["一部出庫"] },
+        { cls: "c-shukko", label: "出庫済", num: counts["出庫済"] }
+      ];
+      document.getElementById("cards").innerHTML = cards.map(function (c) {
+        return '<div class="card ' + c.cls + '"><div class="label">' + c.label + '</div><div class="num">' + c.num + '</div></div>';
+      }).join("");
+    }
+
+    // ---------- manual priority ----------
     function nudge(id, dir) {
-      const list = computeSorted();
-      const idx = list.findIndex(r => r.id === id);
-      const swapIdx = idx + dir;
+      var list = computeSorted();
+      var idx = -1;
+      list.forEach(function (r, i) { if (r.id === id) idx = i; });
+      var swapIdx = idx + dir;
       if (idx < 0 || swapIdx < 0 || swapIdx >= list.length) return;
-      // 現在の表示順を手動優先度として全行に確定させてから入れ替える
-      list.forEach((r, i) => { r.manualPriority = i + 1; });
-      const tmp = list[idx].manualPriority;
+      list.forEach(function (r, i) { r.manualPriority = i + 1; });
+      var tmp = list[idx].manualPriority;
       list[idx].manualPriority = list[swapIdx].manualPriority;
       list[swapIdx].manualPriority = tmp;
       document.getElementById("sortMode").value = "priority";
       save(); render();
     }
 
-    // ---- modal ----
-    const modalBack = document.getElementById("modalBack");
+    // ---------- modal: history editor ----------
+    function histRow(h) {
+      h = h || {};
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        '<td><input type="date" class="h-date" value="' + esc(h.date || "") + '"></td>' +
+        '<td><input type="number" min="0" step="1" class="h-qty" value="' + esc(h.qty == null ? "" : h.qty) + '"></td>' +
+        '<td><input type="text" class="h-lot" value="' + esc(h.lot || "") + '"></td>' +
+        '<td><input type="text" class="h-note" value="' + esc(h.note || "") + '"></td>' +
+        '<td class="col-del"><button type="button" class="h-del" title="この行を削除">×</button></td>';
+      tr.querySelector(".h-del").addEventListener("click", function () { tr.remove(); updateSums(); });
+      Array.prototype.forEach.call(tr.querySelectorAll("input"), function (i) {
+        i.addEventListener("input", updateSums);
+      });
+      return tr;
+    }
+    function fillHist(tbodyId, arr) {
+      var tb = document.getElementById(tbodyId);
+      tb.innerHTML = "";
+      sortedHist(arr).forEach(function (h) { tb.appendChild(histRow(h)); });
+    }
+    function readHist(tbodyId) {
+      var out = [];
+      Array.prototype.forEach.call(document.querySelectorAll("#" + tbodyId + " tr"), function (tr) {
+        var date = tr.querySelector(".h-date").value;
+        var qtyRaw = tr.querySelector(".h-qty").value.trim();
+        var lot = tr.querySelector(".h-lot").value.trim();
+        var note = tr.querySelector(".h-note").value.trim();
+        if (!date && qtyRaw === "" && !lot && !note) return;  // 空行は無視
+        out.push({ date: date, qty: qtyRaw === "" ? 0 : Number(qtyRaw), lot: lot, note: note });
+      });
+      return out;
+    }
+    function addHistRow(tbodyId) {
+      var tb = document.getElementById(tbodyId);
+      var tr = histRow({ date: todayStr(), qty: "" });
+      tb.appendChild(tr);
+      updateSums();
+      tr.querySelector(".h-qty").focus();
+    }
+    function updateSums() {
+      var qty = num(document.getElementById("f_qty").value);
+      var rec = sumQty(readHist("h_receipts"));
+      var shp = sumQty(readHist("h_shipments"));
+
+      var elR = document.getElementById("sumReceipts");
+      elR.textContent = "入庫合計 " + fmt(rec) + " / 数量 " + fmt(qty) + "　残 " + fmt(Math.max(0, qty - rec));
+      elR.className = "sec-sum" + (qty > 0 && rec > qty ? " over" : "");
+      if (qty > 0 && rec > qty) elR.textContent += "（数量を超過しています）";
+
+      var elS = document.getElementById("sumShipments");
+      elS.textContent = "出庫合計 " + fmt(shp) + " / 数量 " + fmt(qty) + "　残 " + fmt(Math.max(0, qty - shp));
+      elS.className = "sec-sum" + (shp > rec ? " over" : "");
+      if (shp > rec) elS.textContent += "（入庫合計を超過しています）";
+
+      document.getElementById("emptyReceipts").style.display =
+        document.querySelectorAll("#h_receipts tr").length ? "none" : "block";
+      document.getElementById("emptyShipments").style.display =
+        document.querySelectorAll("#h_shipments tr").length ? "none" : "block";
+    }
+
+    // ---------- modal ----------
+    var modalBack = document.getElementById("modalBack");
     function openAdd() {
       editingId = null;
       document.getElementById("modalTitle").textContent = "新規登録";
       document.getElementById("btnDelete").style.display = "none";
-      FIELDS.forEach(f => { const el = document.getElementById("f_" + f); if (el) el.value = ""; });
+      FIELDS.forEach(function (f) { var el = document.getElementById("f_" + f); if (el) el.value = ""; });
       document.getElementById("f_dueDate").value = todayStr();
+      fillHist("h_receipts", []); fillHist("h_shipments", []);
+      updateSums();
       modalBack.classList.add("open");
       document.getElementById("f_partNo").focus();
     }
-    function openEdit(id) {
-      const r = records.find(x => x.id === id);
+    // focusAdd: "receipt" / "shipment" を渡すと、その履歴に空行を1行足した状態で開く
+    function openEdit(id, focusAdd) {
+      var r = null;
+      records.forEach(function (x) { if (x.id === id) r = x; });
       if (!r) return;
       editingId = id;
-      document.getElementById("modalTitle").textContent = "編集";
+      document.getElementById("modalTitle").textContent =
+        focusAdd === "receipt" ? "入庫を記録　—　" + (r.partNo || "")
+        : focusAdd === "shipment" ? "出庫を記録　—　" + (r.partNo || "")
+        : "編集";
       document.getElementById("btnDelete").style.display = "inline-block";
-      FIELDS.forEach(f => { const el = document.getElementById("f_" + f); if (el) el.value = r[f] == null ? "" : r[f]; });
+      FIELDS.forEach(function (f) {
+        var el = document.getElementById("f_" + f);
+        if (el) el.value = r[f] == null ? "" : r[f];
+      });
+      fillHist("h_receipts", r.receipts);
+      fillHist("h_shipments", r.shipments);
+      updateSums();
       modalBack.classList.add("open");
+      if (focusAdd === "receipt") addHistRow("h_receipts");
+      else if (focusAdd === "shipment") addHistRow("h_shipments");
     }
     function closeModal() { modalBack.classList.remove("open"); editingId = null; }
 
     function saveModal() {
-      const partNo = document.getElementById("f_partNo").value.trim();
-      const qty = document.getElementById("f_qty").value.trim();
-      const dueDate = document.getElementById("f_dueDate").value;
+      var partNo = document.getElementById("f_partNo").value.trim();
+      var qty = document.getElementById("f_qty").value.trim();
+      var dueDate = document.getElementById("f_dueDate").value;
       if (!partNo) { alert("品番を入力してください"); return; }
       if (qty === "" || Number(qty) < 0) { alert("数量を入力してください"); return; }
       if (!dueDate) { alert("要望納期を入力してください"); return; }
 
-      const data = {};
-      FIELDS.forEach(f => {
-        const el = document.getElementById("f_" + f);
+      var receipts = readHist("h_receipts");
+      var shipments = readHist("h_shipments");
+      var bad = receipts.concat(shipments).filter(function (h) { return !h.date; });
+      if (bad.length && !confirm("日付が未入力の入出庫が " + bad.length + " 件あります。このまま保存しますか？")) return;
+
+      var data = {};
+      FIELDS.forEach(function (f) {
+        var el = document.getElementById("f_" + f);
         data[f] = el ? el.value.trim() : "";
       });
+      data.receipts = receipts;
+      data.shipments = shipments;
 
       if (editingId) {
-        const r = records.find(x => x.id === editingId);
-        Object.assign(r, data);
+        records.forEach(function (x) { if (x.id === editingId) { for (var k in data) x[k] = data[k]; } });
       } else {
         data.id = uid();
         records.push(data);
@@ -517,126 +771,195 @@
     }
     function deleteRecord() {
       if (!editingId) return;
-      if (!confirm("この行を削除しますか？")) return;
-      records = records.filter(r => r.id !== editingId);
+      if (!confirm("この行を削除しますか？（入出庫履歴も削除されます）")) return;
+      var target = editingId;
+      records = records.filter(function (r) { return r.id !== target; });
       save(); render(); closeModal();
     }
 
-    // ---- CSV ----
-    const CSV_HEADERS = [
-      ["partNo","品番"], ["customer","顧客名"], ["orderNo","注文/管理番号"], ["lot","LOT番号"],
-      ["qty","数量"], ["receivedQty","入庫済数量"], ["status","状態"], ["progress","進捗率"],
-      ["dueDate","要望納期"], ["manualPriority","手動優先度"],
-      ["inPlanDate","入庫予定日"], ["inActualDate","入庫実績日"],
-      ["outPlanDate","出庫予定日"], ["outActualDate","出庫実績日"], ["note","備考"]
+    // ---------- CSV ----------
+    // 履歴は "日付 / 数量 / LOT / 備考" を " || " で連結した1セルに格納する
+    var ENT_SEP = " || ", FLD_SEP = " / ";
+    // 区切り文字と衝突する記号は全角に置換し、読み込み時に列がずれないようにする
+    function clean(s) {
+      return String(s == null ? "" : s).replace(/\//g, "／").replace(/\|/g, "｜").replace(/\s+/g, " ").trim();
+    }
+    function histToCell(arr) {
+      return sortedHist(arr).map(function (h) {
+        return [h.date || "", num(h.qty), clean(h.lot), clean(h.note)].join(FLD_SEP);
+      }).join(ENT_SEP);
+    }
+    function cellToHist(cell) {
+      if (!cell || !cell.trim()) return [];
+      return cell.split("||").map(function (part) {
+        var f = part.split("/").map(function (x) { return x.trim(); });
+        // 日付は YYYY-MM-DD なので "/" 分割の影響を受けない
+        if (!f.length) return null;
+        return { date: f[0] || "", qty: Number(f[1]) || 0, lot: f[2] || "", note: f.slice(3).join(" ").trim() };
+      }).filter(function (h) { return h && (h.date || h.qty); });
+    }
+
+    var CSV_HEADERS = [
+      ["partNo", "品番"], ["customer", "顧客名"], ["orderNo", "注文/管理番号"], ["lot", "LOT番号"],
+      ["qty", "数量"], ["receivedQty", "入庫済数量"], ["remainIn", "入庫残"], ["shippedQty", "出庫済数量"],
+      ["status", "状態"], ["inPct", "入庫進捗率"], ["outPct", "出庫進捗率"],
+      ["dueDate", "要望納期"], ["manualPriority", "手動優先度"],
+      ["inPlanDate", "入庫予定日"], ["lastIn", "最終入庫日"],
+      ["outPlanDate", "出庫予定日"], ["lastOut", "最終出庫日"],
+      ["receiptsCell", "入庫履歴"], ["shipmentsCell", "出庫履歴"], ["note", "備考"]
     ];
     function csvCell(v) {
-      const s = String(v == null ? "" : v);
+      var s = String(v == null ? "" : v);
       return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
     }
-    function exportCsv() {
-      const list = computeSorted();
-      const rows = [CSV_HEADERS.map(h => h[1]).join(",")];
-      list.forEach(r => {
-        const row = CSV_HEADERS.map(h => {
-          const key = h[0];
-          if (key === "status") return status(r);
-          if (key === "progress") return progress(r) + "%";
-          return r[key];
-        });
-        rows.push(row.map(csvCell).join(","));
-      });
-      const bom = "﻿"; // Excelで文字化けしないようBOM付き
-      const blob = new Blob([bom + rows.join("\r\n")], { type: "text/csv;charset=utf-8" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "在庫管理_" + todayStr() + ".csv";
+    function download(name, text) {
+      var blob = new Blob(["﻿" + text], { type: "text/csv;charset=utf-8" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = name;
       document.body.appendChild(a); a.click(); a.remove();
       URL.revokeObjectURL(url);
     }
+    function exportCsv() {
+      var list = computeSorted();
+      var rows = [CSV_HEADERS.map(function (h) { return h[1]; }).join(",")];
+      list.forEach(function (r) {
+        var qty = num(r.qty), rec = receivedQty(r), shp = shippedQty(r);
+        var vals = {
+          receivedQty: rec, remainIn: Math.max(0, qty - rec), shippedQty: shp,
+          status: status(r), inPct: inPct(r) + "%", outPct: outPct(r) + "%",
+          lastIn: lastDate(r.receipts), lastOut: lastDate(r.shipments),
+          receiptsCell: histToCell(r.receipts), shipmentsCell: histToCell(r.shipments)
+        };
+        rows.push(CSV_HEADERS.map(function (h) {
+          return csvCell(h[0] in vals ? vals[h[0]] : r[h[0]]);
+        }).join(","));
+      });
+      download("在庫管理_" + todayStr() + ".csv", rows.join("\r\n"));
+    }
+    // 1行=1回の入出庫。Excelのピボット集計用
+    function exportDetailCsv() {
+      var rows = ["品番,顧客名,注文/管理番号,区分,回数,日付,数量,累計,LOT番号,備考,要望納期"];
+      computeSorted().forEach(function (r) {
+        [["入庫", r.receipts], ["出庫", r.shipments]].forEach(function (pair) {
+          var run = 0;
+          sortedHist(pair[1]).forEach(function (h, i) {
+            run += num(h.qty);
+            rows.push([r.partNo, r.customer, r.orderNo, pair[0], i + 1, h.date, num(h.qty), run, h.lot, h.note, r.dueDate]
+              .map(csvCell).join(","));
+          });
+        });
+      });
+      if (rows.length === 1) { alert("書き出せる入出庫明細がありません。"); return; }
+      download("入出庫明細_" + todayStr() + ".csv", rows.join("\r\n"));
+    }
     function parseCsv(text) {
       if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
-      const rows = []; let row = []; let cur = ""; let inQ = false;
-      for (let i = 0; i < text.length; i++) {
-        const c = text[i];
+      var rows = [], row = [], cur = "", inQ = false;
+      for (var i = 0; i < text.length; i++) {
+        var c = text[i];
         if (inQ) {
-          if (c === '"') { if (text[i+1] === '"') { cur += '"'; i++; } else inQ = false; }
+          if (c === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else inQ = false; }
           else cur += c;
-        } else {
-          if (c === '"') inQ = true;
-          else if (c === ",") { row.push(cur); cur = ""; }
-          else if (c === "\n") { row.push(cur); rows.push(row); row = []; cur = ""; }
-          else if (c === "\r") { /* skip */ }
-          else cur += c;
-        }
+        } else if (c === '"') { inQ = true; }
+        else if (c === ",") { row.push(cur); cur = ""; }
+        else if (c === "\n") { row.push(cur); rows.push(row); row = []; cur = ""; }
+        else if (c !== "\r") { cur += c; }
       }
       if (cur !== "" || row.length) { row.push(cur); rows.push(row); }
-      return rows.filter(r => r.length && r.some(c => c !== ""));
+      return rows.filter(function (r) { return r.length && r.some(function (c) { return c !== ""; }); });
     }
     function importCsv(text) {
-      const rows = parseCsv(text);
+      var rows = parseCsv(text);
       if (rows.length < 2) { alert("読み込めるデータがありません"); return; }
-      const header = rows[0].map(h => h.trim());
-      // 日本語ヘッダー・英語キーどちらでもマッピング
-      const map = {};
-      header.forEach((h, i) => {
-        const found = CSV_HEADERS.find(x => x[1] === h || x[0] === h);
+      var header = rows[0].map(function (h) { return h.trim(); });
+      var map = {};
+      header.forEach(function (h, i) {
+        var found = null;
+        CSV_HEADERS.forEach(function (x) { if (x[1] === h || x[0] === h) found = x; });
         if (found) map[found[0]] = i;
+        // 旧フォーマットの列も受け付ける
+        if (h === "入庫実績日") map.legacyIn = i;
+        if (h === "出庫実績日") map.legacyOut = i;
       });
       if (map.partNo == null) { alert("「品番」列が見つかりません。書き出したCSVの形式に合わせてください。"); return; }
-      let added = 0;
-      for (let i = 1; i < rows.length; i++) {
-        const r = rows[i];
-        const rec = { id: uid() };
-        FIELDS.forEach(f => { rec[f] = map[f] != null ? (r[map[f]] || "").trim() : ""; });
+
+      var added = 0;
+      for (var i = 1; i < rows.length; i++) {
+        var row = rows[i];
+        var get = function (k) { return map[k] != null ? (row[map[k]] || "").trim() : ""; };
+        var rec = { id: uid() };
+        FIELDS.forEach(function (f) { rec[f] = get(f); });
         if (!rec.partNo) continue;
+
+        rec.receipts = cellToHist(get("receiptsCell"));
+        rec.shipments = cellToHist(get("shipmentsCell"));
+        // 履歴列が無い旧CSV: 累計数量＋実績日から1件の入出庫として取り込む
+        if (!rec.receipts.length) {
+          var rq = Number(get("receivedQty")) || 0;
+          if (rq > 0) rec.receipts.push({ date: get("legacyIn") || get("lastIn"), qty: rq, lot: rec.lot, note: "" });
+        }
+        if (!rec.shipments.length) {
+          var od = get("legacyOut") || get("lastOut");
+          var sq = Number(get("shippedQty")) || 0;
+          if (sq > 0) rec.shipments.push({ date: od, qty: sq, lot: rec.lot, note: "" });
+          else if (od) rec.shipments.push({ date: od, qty: num(rec.qty), lot: rec.lot, note: "" });
+        }
         records.push(rec); added++;
       }
       save(); render();
       alert(added + " 件を追加しました。");
     }
 
-    // ---- sample ----
+    // ---------- sample ----------
     function loadSample() {
       if (records.length && !confirm("サンプルデータを追加します。よろしいですか？")) return;
-      const t = new Date();
-      const d = off => { const x = new Date(t); x.setDate(x.getDate() + off); return x.toISOString().slice(0,10); };
-      const sample = [
-        { partNo:"ABC-1000", customer:"山田製作所", orderNo:"PO-2026-001", lot:"L260901", qty:"500", receivedQty:"0",  dueDate:d(-2), manualPriority:"", inPlanDate:d(1),  inActualDate:"",    outPlanDate:"",    outActualDate:"", note:"至急・未入庫" },
-        { partNo:"DEF-2200", customer:"鈴木工業",   orderNo:"PO-2026-002", lot:"L260905", qty:"300", receivedQty:"150",dueDate:d(3),  manualPriority:"1",inPlanDate:d(-3), inActualDate:d(-3), outPlanDate:d(5),  outActualDate:"", note:"分納中" },
-        { partNo:"GHI-3300", customer:"佐藤商事",   orderNo:"PO-2026-003", lot:"L260820", qty:"1000",receivedQty:"1000",dueDate:d(6), manualPriority:"", inPlanDate:d(-6), inActualDate:d(-6), outPlanDate:d(7),  outActualDate:"", note:"入庫完了・出荷待ち" },
-        { partNo:"JKL-4400", customer:"山田製作所", orderNo:"PO-2026-004", lot:"L260812", qty:"200", receivedQty:"200",dueDate:d(-10),manualPriority:"",inPlanDate:d(-12),inActualDate:d(-12),outPlanDate:d(-9), outActualDate:d(-9),note:"出荷済み" },
-        { partNo:"MNO-5500", customer:"高橋精密",   orderNo:"PO-2026-005", lot:"",        qty:"800", receivedQty:"0",  dueDate:d(14), manualPriority:"", inPlanDate:d(10), inActualDate:"",    outPlanDate:"",    outActualDate:"", note:"" },
+      var t = new Date();
+      var d = function (off) { var x = new Date(t); x.setDate(x.getDate() + off); return new Date(x.getTime() - x.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+      var sample = [
+        { partNo: "ABC-1000", customer: "山田製作所", orderNo: "PO-2026-001", lot: "", qty: "500", dueDate: d(-2), manualPriority: "", inPlanDate: d(1), outPlanDate: "", note: "至急・未入庫",
+          receipts: [], shipments: [] },
+        { partNo: "DEF-2200", customer: "鈴木工業", orderNo: "PO-2026-002", lot: "", qty: "300", dueDate: d(3), manualPriority: "1", inPlanDate: d(6), outPlanDate: d(8), note: "3回に分けて分納予定",
+          receipts: [{ date: d(-8), qty: 100, lot: "L260830", note: "初回分" }, { date: d(-2), qty: 80, lot: "L260905", note: "2回目" }], shipments: [] },
+        { partNo: "GHI-3300", customer: "佐藤商事", orderNo: "PO-2026-003", lot: "L260820", qty: "1000", dueDate: d(6), manualPriority: "", inPlanDate: "", outPlanDate: d(7), note: "入庫完了・出荷待ち",
+          receipts: [{ date: d(-12), qty: 600, lot: "L260815", note: "" }, { date: d(-6), qty: 400, lot: "L260820", note: "" }], shipments: [] },
+        { partNo: "JKL-4400", customer: "山田製作所", orderNo: "PO-2026-004", lot: "L260812", qty: "200", dueDate: d(-10), manualPriority: "", inPlanDate: "", outPlanDate: "", note: "全数出荷済み",
+          receipts: [{ date: d(-12), qty: 200, lot: "L260812", note: "" }], shipments: [{ date: d(-9), qty: 200, lot: "L260812", note: "" }] },
+        { partNo: "MNO-5500", customer: "高橋精密", orderNo: "PO-2026-005", lot: "", qty: "800", dueDate: d(14), manualPriority: "", inPlanDate: d(10), outPlanDate: d(12), note: "分割出荷中",
+          receipts: [{ date: d(-4), qty: 800, lot: "L260907", note: "" }], shipments: [{ date: d(-1), qty: 300, lot: "L260907", note: "先行出荷分" }] }
       ];
-      sample.forEach(s => { s.id = uid(); records.push(s); });
+      sample.forEach(function (s) { s.id = uid(); records.push(s); });
       save(); render();
     }
 
-    // ---- events ----
+    // ---------- events ----------
     document.getElementById("btnAdd").addEventListener("click", openAdd);
     document.getElementById("btnSave").addEventListener("click", saveModal);
     document.getElementById("btnCancel").addEventListener("click", closeModal);
     document.getElementById("btnDelete").addEventListener("click", deleteRecord);
-    modalBack.addEventListener("click", e => { if (e.target === modalBack) closeModal(); });
-    document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+    document.getElementById("btnAddReceipt").addEventListener("click", function () { addHistRow("h_receipts"); });
+    document.getElementById("btnAddShipment").addEventListener("click", function () { addHistRow("h_shipments"); });
+    document.getElementById("f_qty").addEventListener("input", updateSums);
+    modalBack.addEventListener("click", function (e) { if (e.target === modalBack) closeModal(); });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeModal(); });
 
-    ["search","filterStatus","sortMode","hideDone"].forEach(id =>
-      document.getElementById(id).addEventListener("input", render));
+    ["search", "filterStatus", "sortMode", "hideDone", "expandAll"].forEach(function (id) {
+      document.getElementById(id).addEventListener("input", render);
+    });
 
     document.getElementById("btnExport").addEventListener("click", exportCsv);
-    document.getElementById("btnImport").addEventListener("click", () => document.getElementById("fileInput").click());
-    document.getElementById("fileInput").addEventListener("change", e => {
-      const file = e.target.files[0];
+    document.getElementById("btnExportDetail").addEventListener("click", exportDetailCsv);
+    document.getElementById("btnImport").addEventListener("click", function () { document.getElementById("fileInput").click(); });
+    document.getElementById("fileInput").addEventListener("change", function (e) {
+      var file = e.target.files[0];
       if (!file) return;
-      const reader = new FileReader();
-      reader.onload = () => importCsv(reader.result);
+      var reader = new FileReader();
+      reader.onload = function () { importCsv(reader.result); };
       reader.readAsText(file, "utf-8");
       e.target.value = "";
     });
     document.getElementById("btnSample").addEventListener("click", loadSample);
 
-    // ---- init ----
     load(); render();
   })();
   </script>
