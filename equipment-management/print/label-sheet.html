@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>設備ラベル印刷</title>
+<script src="qr.js"></script>
+<style>
+  :root{
+    --ink:#201f1e; --muted:#605e5c; --line:#c8c6c4; --accent:#0063b1; --bg:#faf9f8;
+    /* ラベル寸法（A4 24面 / 70 x 33.9mm）。画面から調整できる */
+    --label-w: 70mm; --label-h: 33.9mm;
+    --sheet-mt: 12.9mm; --sheet-ml: 0mm;
+    --cols: 3;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:"Yu Gothic UI","Meiryo",system-ui,sans-serif;color:var(--ink);background:var(--bg)}
+
+  /* ---------- 画面（操作パネル） ---------- */
+  .panel{max-width:880px;margin:0 auto;padding:24px 16px 48px}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 20px;line-height:1.7}
+  fieldset{border:1px solid var(--line);border-radius:8px;padding:14px 16px;margin:0 0 14px;background:#fff}
+  legend{font-size:13px;font-weight:600;padding:0 6px;color:var(--accent)}
+  .row{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+  label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  input[type=number],select,input[type=text]{font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:4px;background:#fff;color:var(--ink)}
+  input[type=number]{width:90px}
+  button{font:inherit;font-size:14px;font-weight:600;padding:9px 18px;border:0;border-radius:4px;background:var(--accent);color:#fff;cursor:pointer}
+  button:disabled{background:#c8c6c4;cursor:not-allowed}
+  button.ghost{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+  .status{font-size:13px;margin-top:10px;padding:8px 12px;border-radius:4px;line-height:1.6}
+  .status.ok{background:#dff6dd;color:#0b6a0b}
+  .status.warn{background:#fff4ce;color:#835c00}
+  .status.err{background:#fde7e9;color:#a80000}
+  .hint{font-size:12px;color:var(--muted);line-height:1.7;margin:8px 0 0}
+  code{background:#f3f2f1;padding:1px 5px;border-radius:3px;font-size:12px}
+
+  /* ---------- 台紙 ---------- */
+  .sheet{background:#fff;margin:20px auto;padding:var(--sheet-mt) 0 0 var(--sheet-ml);
+         width:210mm;box-shadow:0 1px 6px rgba(0,0,0,.15)}
+  .grid{display:grid;grid-template-columns:repeat(var(--cols), var(--label-w))}
+  .label{width:var(--label-w);height:var(--label-h);padding:2mm 2.5mm;display:flex;align-items:center;gap:2.5mm;overflow:hidden}
+  .label.cut{border:0.2mm dashed #b0b0b0}
+  .qr{width:26mm;height:26mm;flex:0 0 26mm;display:flex;align-items:center;justify-content:center}
+  .qr img,.qr canvas{width:100%!important;height:100%!important}
+  .txt{min-width:0;flex:1}
+  .num{font-size:13mm;font-weight:800;line-height:1;letter-spacing:.5mm;font-family:"Consolas","Yu Gothic UI",monospace}
+  .nm{font-size:3.1mm;line-height:1.25;margin-top:1.2mm;overflow:hidden;
+      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .loc{font-size:2.7mm;color:#605e5c;margin-top:.8mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .empty-note{padding:40px;text-align:center;color:var(--muted);font-size:14px}
+
+  @media print{
+    body{background:#fff}
+    .panel{display:none}
+    .sheet{margin:0;box-shadow:none;width:auto;padding:var(--sheet-mt) 0 0 var(--sheet-ml)}
+    .grid{page-break-inside:auto}
+    .label{page-break-inside:avoid;break-inside:avoid}
+    @page{size:A4;margin:0}
+  }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <h1>設備ラベル印刷</h1>
+  <p class="sub">
+    設備マスタの CSV を読み込んで、短縮番号と QR コードのラベルを印刷します（フェーズ6-2 / 7-1）。<br>
+    ファイルはブラウザの中だけで処理され、どこにも送信されません。QR の生成も同梱の <code>qr.js</code> で行うため、インターネットに接続していない端末でも使えます。
+  </p>
+
+  <fieldset>
+    <legend>1. CSV を選ぶ</legend>
+    <div class="row">
+      <div>
+        <label for="file">設備マスタ CSV（<code>data/eqm_equipments.csv</code>）</label>
+        <input type="file" id="file" accept=".csv,text/csv">
+      </div>
+    </div>
+    <p class="hint">
+      必要な列: <code>短縮番号</code> / <code>設備名</code>。あれば <code>場所</code> <code>QRコード値</code> も使います。<br>
+      短縮番号が空の行は印刷されません。先に <code>New-ShortNumber.ps1</code> で採番してください。
+    </p>
+    <div id="loadStatus" class="status warn" hidden></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>2. 印刷する範囲</legend>
+    <div class="row">
+      <div>
+        <label for="loc">場所で絞る</label>
+        <select id="loc"><option value="">（すべて）</option></select>
+      </div>
+      <div>
+        <label for="skip">先頭の空きラベル数</label>
+        <input type="number" id="skip" value="0" min="0" max="23">
+      </div>
+      <div>
+        <label for="qrsize">QR の有無</label>
+        <select id="qrsize">
+          <option value="1">QR あり</option>
+          <option value="0">番号のみ（大きく出す）</option>
+        </select>
+      </div>
+    </div>
+    <p class="hint">
+      「先頭の空きラベル数」は、使いかけのラベルシートを使うときに指定します。<br>
+      場所で絞ると、その場所を回りながら貼れます。貼付作業は場所単位で進めるのが最も早いです。
+    </p>
+  </fieldset>
+
+  <fieldset>
+    <legend>3. 用紙に合わせる</legend>
+    <div class="row">
+      <div><label for="lw">ラベル幅 (mm)</label><input type="number" id="lw" value="70" step="0.1"></div>
+      <div><label for="lh">ラベル高さ (mm)</label><input type="number" id="lh" value="33.9" step="0.1"></div>
+      <div><label for="cols">列数</label><input type="number" id="cols" value="3" min="1" max="6"></div>
+      <div><label for="mt">上余白 (mm)</label><input type="number" id="mt" value="12.9" step="0.1"></div>
+      <div><label for="ml">左余白 (mm)</label><input type="number" id="ml" value="0" step="0.1"></div>
+      <div><label for="cut">枠線</label>
+        <select id="cut"><option value="0">なし（ラベルシール）</option><option value="1">あり（普通紙で切る）</option></select>
+      </div>
+    </div>
+    <p class="hint">
+      初期値は A4 24面（70×33.9mm）のラベルシールです。<br>
+      <strong>いきなり本番のシールに印刷しないでください。</strong>まず普通紙に刷ってシールに重ね、
+      ずれていたら上余白・左余白で合わせてください。プリンターによって 1〜2mm ずれます。
+    </p>
+  </fieldset>
+
+  <div class="row">
+    <button id="print" disabled>印刷する</button>
+    <button id="reload" class="ghost" type="button">再描画</button>
+    <span id="count" class="hint"></span>
+  </div>
+</div>
+
+<div class="sheet" id="sheet">
+  <div class="empty-note" id="emptyNote">CSV を読み込むと、ここにラベルが並びます。</div>
+  <div class="grid" id="grid"></div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var rows = [];          // {num, name, loc, qr}
+  var root = document.documentElement;
+  var $ = function (id) { return document.getElementById(id); };
+
+  // ---------- CSV パーサ（引用符・改行入りフィールドに対応） ----------
+  function parseCsv(text) {
+    if (text.charCodeAt(0) === 0xFEFF) { text = text.slice(1); }   // BOM
+    var out = [], row = [], field = '', inQuotes = false, i = 0;
+    while (i < text.length) {
+      var c = text[i];
+      if (inQuotes) {
+        if (c === '"') {
+          if (text[i + 1] === '"') { field += '"'; i += 2; continue; }
+          inQuotes = false; i++; continue;
+        }
+        field += c; i++; continue;
+      }
+      if (c === '"') { inQuotes = true; i++; continue; }
+      if (c === ',') { row.push(field); field = ''; i++; continue; }
+      if (c === '\r') { i++; continue; }
+      if (c === '\n') { row.push(field); out.push(row); row = []; field = ''; i++; continue; }
+      field += c; i++;
+    }
+    if (field.length || row.length) { row.push(field); out.push(row); }
+    return out.filter(function (r) { return r.some(function (v) { return v.trim() !== ''; }); });
+  }
+
+  function setStatus(kind, html) {
+    var el = $('loadStatus');
+    el.className = 'status ' + kind;
+    el.innerHTML = html;
+    el.hidden = false;
+  }
+
+  // ---------- 読み込み ----------
+  $('file').addEventListener('change', function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) { return; }
+    var reader = new FileReader();
+    reader.onload = function () {
+      try { load(String(reader.result)); }
+      catch (err) { setStatus('err', '読み込みに失敗しました: ' + err.message); }
+    };
+    reader.onerror = function () { setStatus('err', 'ファイルを読めませんでした。'); };
+    reader.readAsText(f, 'UTF-8');
+  });
+
+  function load(text) {
+    var table = parseCsv(text);
+    if (table.length < 2) { setStatus('err', '行がありません。'); return; }
+
+    var head = table[0].map(function (h) { return h.trim(); });
+    var iNum = head.indexOf('短縮番号');
+    var iName = head.indexOf('設備名');
+    var iLoc = head.indexOf('場所');
+    var iQr = head.indexOf('QRコード値');
+
+    if (iNum < 0 || iName < 0) {
+      setStatus('err', '見出しに <code>短縮番号</code> と <code>設備名</code> が必要です。'
+        + '<br>読み取れた見出し: ' + head.join(' / '));
+      return;
+    }
+
+    var blanks = 0;
+    rows = [];
+    for (var r = 1; r < table.length; r++) {
+      var line = table[r];
+      var num = (line[iNum] || '').trim();
+      if (!num) { blanks++; continue; }
+      rows.push({
+        num: num,
+        name: (line[iName] || '').trim(),
+        loc: iLoc >= 0 ? (line[iLoc] || '').trim() : '',
+        qr: (iQr >= 0 && (line[iQr] || '').trim()) ? line[iQr].trim() : num
+      });
+    }
+
+    // 場所の選択肢
+    var sel = $('loc'), seen = {};
+    sel.innerHTML = '<option value="">（すべて）</option>';
+    rows.forEach(function (x) {
+      if (x.loc && !seen[x.loc]) {
+        seen[x.loc] = 1;
+        var o = document.createElement('option');
+        o.value = x.loc; o.textContent = x.loc;
+        sel.appendChild(o);
+      }
+    });
+
+    var msg = rows.length + ' 件を読み込みました。';
+    if (blanks) { msg += ' 短縮番号が空の ' + blanks + ' 件は除いています。'; }
+    setStatus(blanks ? 'warn' : 'ok', msg);
+    $('print').disabled = rows.length === 0;
+    render();
+  }
+
+  // ---------- 描画 ----------
+  function render() {
+    root.style.setProperty('--label-w', $('lw').value + 'mm');
+    root.style.setProperty('--label-h', $('lh').value + 'mm');
+    root.style.setProperty('--sheet-mt', $('mt').value + 'mm');
+    root.style.setProperty('--sheet-ml', $('ml').value + 'mm');
+    root.style.setProperty('--cols', $('cols').value);
+
+    var grid = $('grid');
+    grid.innerHTML = '';
+
+    var want = $('loc').value;
+    var list = rows.filter(function (x) { return !want || x.loc === want; });
+    $('emptyNote').hidden = list.length > 0;
+    $('count').textContent = list.length ? (list.length + ' 枚を配置しました') : '';
+
+    var withQr = $('qrsize').value === '1';
+    var cut = $('cut').value === '1';
+    var hasLib = typeof window.QRLite !== 'undefined';
+    if (withQr && !hasLib) {
+      setStatus('warn', 'qr.js を読み込めませんでした。このファイルと同じフォルダーに qr.js があるか確認してください。'
+        + ' いまは番号のみのラベルを作ります。');
+    }
+
+    var failed = [];
+    var skip = Math.max(0, parseInt($('skip').value, 10) || 0);
+    for (var s = 0; s < skip; s++) {
+      var blank = document.createElement('div');
+      blank.className = 'label' + (cut ? ' cut' : '');
+      grid.appendChild(blank);
+    }
+
+    list.forEach(function (item) {
+      var el = document.createElement('div');
+      el.className = 'label' + (cut ? ' cut' : '');
+
+      if (withQr && hasLib) {
+        var qrBox = document.createElement('div');
+        qrBox.className = 'qr';
+        var cv = document.createElement('canvas');
+        qrBox.appendChild(cv);
+        el.appendChild(qrBox);
+        try {
+          window.QRLite.draw(cv, item.qr, { ec: 'M', quiet: 2, scale: 8 });
+        } catch (e) {
+          qrBox.parentNode.removeChild(qrBox);
+          failed.push(item.num + '（' + e.message + '）');
+        }
+      }
+
+      var txt = document.createElement('div');
+      txt.className = 'txt';
+
+      var num = document.createElement('div');
+      num.className = 'num';
+      num.textContent = item.num;
+      if (!withQr || !hasLib) { num.style.fontSize = '18mm'; }
+      txt.appendChild(num);
+
+      var nm = document.createElement('div');
+      nm.className = 'nm';
+      nm.textContent = item.name;
+      txt.appendChild(nm);
+
+      if (item.loc) {
+        var lo = document.createElement('div');
+        lo.className = 'loc';
+        lo.textContent = item.loc;
+        txt.appendChild(lo);
+      }
+
+      el.appendChild(txt);
+      grid.appendChild(el);
+    });
+
+    if (failed.length) {
+      setStatus('err', failed.length + ' 件で QR を作れませんでした: ' + failed.slice(0, 5).join(' / '));
+    }
+  }
+
+  ['loc', 'skip', 'qrsize', 'lw', 'lh', 'cols', 'mt', 'ml', 'cut'].forEach(function (id) {
+    $(id).addEventListener('change', render);
+  });
+  $('reload').addEventListener('click', render);
+  $('print').addEventListener('click', function () { window.print(); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+﻿社員番号,氏名,カナ,UPN,EntraオブジェクトID,役割,有効,部署,既定の場所
+E0001,設備 管理者,セツビ カンリシャ,admin@example.onmicrosoft.com,,管理者,有効,MNT,F1
+E0002,製造 一郎,セイゾウ イチロウ,user1@example.onmicrosoft.com,,使用者,有効,MFG1,F1
+E0003,製造 二郎,セイゾウ ジロウ,user2@example.onmicrosoft.com,,使用者,有効,MFG2,F2

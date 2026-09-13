@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>設備管理アプリ 操作説明（A4・1枚）</title>
+<style>
+  :root{
+    --ink:#1b1a19; --muted:#605e5c; --line:#d2d0ce;
+    --go:#107c10; --stop:#c45911; --warn:#a80000; --accent:#0063b1;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{font-family:"Yu Gothic UI","Meiryo",system-ui,sans-serif;color:var(--ink);background:#f3f2f1}
+
+  /* ---------- 編集パネル（印刷されない） ---------- */
+  .editor{max-width:760px;margin:0 auto;padding:20px 16px 8px}
+  .editor h2{font-size:16px;margin:0 0 6px}
+  .editor p{font-size:13px;color:var(--muted);line-height:1.8;margin:0 0 14px}
+  .fields{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px;
+          background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px}
+  .fields label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+  .fields input{width:100%;font:inherit;font-size:14px;padding:6px 8px;border:1px solid var(--line);border-radius:4px}
+  .actions{margin:14px 0 8px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  button{font:inherit;font-size:14px;font-weight:600;padding:9px 18px;border:0;border-radius:4px;
+         background:var(--accent);color:#fff;cursor:pointer}
+  .note{font-size:12px;color:var(--muted);line-height:1.8}
+
+  /* ---------- A4 本体 ---------- */
+  .page{width:210mm;min-height:297mm;margin:16px auto 40px;background:#fff;padding:14mm 13mm 10mm;
+        box-shadow:0 2px 10px rgba(0,0,0,.15);display:flex;flex-direction:column}
+  .head{display:flex;align-items:baseline;gap:6mm;border-bottom:1.2mm solid var(--ink);padding-bottom:3mm}
+  .head h1{font-size:11mm;margin:0;letter-spacing:.5mm}
+  .head .eqname{font-size:5mm;color:var(--muted)}
+
+  .block{margin-top:7mm}
+  .block > .bar{display:flex;align-items:center;gap:3mm;padding:2.5mm 4mm;border-radius:2mm;color:#fff}
+  .bar.go{background:var(--go)} .bar.stop{background:var(--stop)}
+  .bar .when{font-size:6.5mm;font-weight:800}
+  .bar .sub{font-size:4mm;opacity:.95}
+
+  .steps{display:grid;grid-template-columns:1fr 1fr;gap:5mm;margin-top:4mm}
+  .step{border:0.4mm solid var(--line);border-radius:2mm;padding:3.5mm;display:flex;flex-direction:column}
+  .step .n{display:flex;align-items:center;gap:2.5mm;margin-bottom:2.5mm}
+  .step .badge{width:9mm;height:9mm;border-radius:50%;color:#fff;font-size:5.5mm;font-weight:800;
+               display:flex;align-items:center;justify-content:center;flex:0 0 9mm}
+  .go .badge,.step.go .badge{background:var(--go)}
+  .step.stop .badge{background:var(--stop)}
+  .step .t{font-size:5.2mm;font-weight:700;line-height:1.3}
+  .shot{flex:1;min-height:42mm;border:0.4mm dashed #b3b0ad;border-radius:1.5mm;background:#faf9f8;
+        display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .shot img{width:100%;height:100%;object-fit:contain;display:block}
+  .shot .ph{text-align:center;color:#8a8886;font-size:3.4mm;line-height:1.7;padding:3mm}
+  .step .d{font-size:3.8mm;color:var(--muted);margin-top:2.5mm;line-height:1.6}
+
+  .callout{margin-top:6mm;border:0.8mm solid var(--warn);border-radius:2mm;padding:4mm 5mm;background:#fff5f5}
+  .callout .h{font-size:5.5mm;font-weight:800;color:var(--warn);margin-bottom:1.5mm}
+  .callout .b{font-size:4.2mm;line-height:1.65}
+
+  .foot{margin-top:auto;padding-top:5mm;border-top:0.4mm solid var(--line);
+        display:flex;justify-content:space-between;gap:6mm;font-size:3.8mm;color:var(--muted)}
+  .foot b{color:var(--ink)}
+
+  @media print{
+    body{background:#fff}
+    .editor{display:none}
+    .page{margin:0;box-shadow:none;width:auto;min-height:0;padding:12mm 12mm 8mm}
+    @page{size:A4 portrait;margin:0}
+  }
+</style>
+</head>
+<body>
+
+<div class="editor">
+  <h2>操作説明（A4・1枚）</h2>
+  <p>
+    印刷して<strong>設備のそばに貼ってください</strong>。配ると捨てられます。掲示すると読まれます。<br>
+    画面写真の枠をクリックすると、実際のアプリのスクリーンショットを差し込めます。
+    <strong>必ず実物の画面に差し替えてください。</strong>現場は画面の色と形で操作を覚えます。
+  </p>
+
+  <div class="fields">
+    <div><label for="f-title">見出し</label><input id="f-title" value="設備の使い方"></div>
+    <div><label for="f-eq">対象（設備名や場所）</label><input id="f-eq" value="この設備"></div>
+    <div><label for="f-contact">困ったときの連絡先</label><input id="f-contact" value="保全部　内線 1234"></div>
+    <div><label for="f-appname">アプリ名</label><input id="f-appname" value="設備管理"></div>
+  </div>
+
+  <div class="actions">
+    <button id="print" type="button">印刷する</button>
+    <span class="note">まず普通紙に1枚刷って、離れて読めるか確認してください。</span>
+  </div>
+</div>
+
+<div class="page">
+  <div class="head">
+    <h1 id="o-title">設備の使い方</h1>
+    <div class="eqname" id="o-eq">この設備</div>
+  </div>
+
+  <!-- ===== 使うとき ===== -->
+  <div class="block">
+    <div class="bar go">
+      <div class="when">使うとき</div>
+      <div class="sub">作業を始める前に、この2ステップだけ</div>
+    </div>
+    <div class="steps">
+      <div class="step go">
+        <div class="n"><div class="badge">1</div><div class="t">ラベルの番号を入れる</div></div>
+        <div class="shot" data-slot="s1">
+          <div class="ph">［ 画面写真 ①：テンキー画面 ］<br>ここをクリックして差し込む</div>
+        </div>
+        <div class="d">設備に貼ってある<strong>4桁の番号</strong>を押します。</div>
+      </div>
+      <div class="step go">
+        <div class="n"><div class="badge">2</div><div class="t">緑のボタンを押す</div></div>
+        <div class="shot" data-slot="s2">
+          <div class="ph">［ 画面写真 ②：設備詳細画面 ］<br>「使用を開始する」が写るように</div>
+        </div>
+        <div class="d"><strong>「使用を開始する」</strong>を押したら、そのまま作業を始めてください。</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 終わったとき ===== -->
+  <div class="block">
+    <div class="bar stop">
+      <div class="when">終わったとき</div>
+      <div class="sub">作業が終わったら、忘れずに</div>
+    </div>
+    <div class="steps">
+      <div class="step stop">
+        <div class="n"><div class="badge">1</div><div class="t">同じ番号を入れる</div></div>
+        <div class="shot" data-slot="s3">
+          <div class="ph">［ 画面写真 ③：テンキー画面 ］<br>①と同じ画面で構いません</div>
+        </div>
+        <div class="d">使い始めたときと同じ4桁の番号です。</div>
+      </div>
+      <div class="step stop">
+        <div class="n"><div class="badge">2</div><div class="t">オレンジのボタンを押す</div></div>
+        <div class="shot" data-slot="s4">
+          <div class="ph">［ 画面写真 ④：設備詳細画面 ］<br>「使用を終了する」が写るように</div>
+        </div>
+        <div class="d"><strong>「使用を終了する」</strong>を押せば終わりです。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="h">終了を押さないと、次の人が使えません</div>
+    <div class="b">
+      画面には「使用中」と出たままになり、他の人はこの設備を借りられません。
+      <strong>その場で押してください。</strong>席に戻ってからでは忘れます。
+    </div>
+  </div>
+
+  <div class="foot">
+    <div>困ったとき： <b id="o-contact">保全部　内線 1234</b></div>
+    <div>アプリ名： <b id="o-appname">設備管理</b></div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var $ = function (id) { return document.getElementById(id); };
+
+  // 入力欄と紙面の対応
+  [['f-title','o-title'],['f-eq','o-eq'],['f-contact','o-contact']].forEach(function (pair) {
+    var src = $(pair[0]), dst = $(pair[1]);
+    src.addEventListener('input', function () { dst.textContent = src.value; });
+  });
+  $('f-appname').addEventListener('input', function () {
+    $('o-appname').textContent = $('f-appname').value;
+  });
+
+  // 画面写真の差し込み（クリックでファイル選択。ブラウザの中だけで完結する）
+  var picker = document.createElement('input');
+  picker.type = 'file';
+  picker.accept = 'image/*';
+  picker.style.display = 'none';
+  document.body.appendChild(picker);
+  var current = null;
+
+  Array.prototype.forEach.call(document.querySelectorAll('.shot'), function (slot) {
+    slot.style.cursor = 'pointer';
+    slot.title = 'クリックして画面写真を差し込む';
+    slot.addEventListener('click', function () { current = slot; picker.value = ''; picker.click(); });
+  });
+
+  picker.addEventListener('change', function () {
+    var f = picker.files && picker.files[0];
+    if (!f || !current) { return; }
+    var reader = new FileReader();
+    var slot = current;
+    reader.onload = function () {
+      slot.innerHTML = '';
+      var img = document.createElement('img');
+      img.src = String(reader.result);
+      img.alt = '';
+      slot.appendChild(img);
+    };
+    reader.readAsDataURL(f);
+  });
+
+  $('print').addEventListener('click', function () { window.print(); });
+})();
+</script>
+</body>
+</html>

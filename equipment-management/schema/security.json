@@ -1,0 +1,67 @@
+{
+  "$comment": "セキュリティロール（フェーズ1-8）と列レベルセキュリティ（フェーズ1-9）の定義。scripts/Deploy-Security.ps1 が読み込みます。depth は Basic=自分のみ / Local=部署 / Deep=部署配下 / Global=組織全体。",
+
+  "roles": [
+    {
+      "name": "設備-使用者",
+      "description": "現場の使用者。設備の使用開始・終了、貸出登録、返却ができる。削除はできない。",
+      "entraGroup": "設備-使用者",
+      "tablePrivileges": [
+        { "table": "eqm_equipmenttype", "privileges": { "Read": "Global", "AppendTo": "Global" } },
+        { "table": "eqm_location",      "privileges": { "Read": "Global", "AppendTo": "Global" } },
+        { "table": "eqm_department",    "privileges": { "Read": "Global", "AppendTo": "Global" } },
+        { "table": "eqm_borrower",      "privileges": { "Read": "Global", "AppendTo": "Global" } },
+        { "table": "eqm_user",          "privileges": { "Read": "Global", "AppendTo": "Global" } },
+        { "table": "eqm_equipment",     "privileges": { "Read": "Global", "Write": "Global", "Append": "Global", "AppendTo": "Global" },
+          "$note": "使用開始・終了でステータスを更新するため Write が必要。誤編集はモデル駆動アプリ側の読み取り専用化（4-3）で抑止する。" },
+        { "table": "eqm_operationlog",  "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Append": "Global", "AppendTo": "Global" },
+          "$note": "ホーム画面で『誰が使用中か』を出すため Read は Global。Delete は与えない。" },
+        { "table": "eqm_loan",          "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Append": "Global", "AppendTo": "Global" } }
+      ]
+    },
+
+    {
+      "name": "設備-管理者",
+      "description": "設備管理の担当者。マスタ保守、強制終了、状態の手動修正ができる。",
+      "entraGroup": "設備-管理者",
+      "tablePrivileges": [
+        { "table": "eqm_equipmenttype", "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global" } },
+        { "table": "eqm_location",      "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global" } },
+        { "table": "eqm_department",    "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global" } },
+        { "table": "eqm_borrower",      "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global" } },
+        { "table": "eqm_user",          "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global" } },
+        { "table": "eqm_equipment",     "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global", "Assign": "Global", "Share": "Global" } },
+        { "table": "eqm_operationlog",  "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global", "Assign": "Global", "Share": "Global" } },
+        { "table": "eqm_loan",          "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global", "Assign": "Global", "Share": "Global" } }
+      ]
+    },
+
+    {
+      "name": "設備-システム",
+      "description": "フローを所有するサービスアカウント専用（フェーズ0-5）。人には割り当てない。",
+      "entraGroup": null,
+      "tablePrivileges": [
+        { "table": "eqm_equipmenttype", "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global" } },
+        { "table": "eqm_location",      "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global" } },
+        { "table": "eqm_department",    "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global" } },
+        { "table": "eqm_borrower",      "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global" } },
+        { "table": "eqm_user",          "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global" } },
+        { "table": "eqm_equipment",     "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global", "Assign": "Global", "Share": "Global" } },
+        { "table": "eqm_operationlog",  "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global", "Assign": "Global", "Share": "Global" } },
+        { "table": "eqm_loan",          "privileges": { "Create": "Global", "Read": "Global", "Write": "Global", "Delete": "Global", "Append": "Global", "AppendTo": "Global", "Assign": "Global", "Share": "Global" } }
+      ]
+    }
+  ],
+
+  "columnSecurityProfiles": [
+    {
+      "name": "設備-稼働ログ本文",
+      "description": "稼働ログの作業内容・終了時コメントを読める人を管理者に限定する（フェーズ1-9）。このプロファイルに追加されていないユーザーには値が *** で隠れる。",
+      "permissions": [
+        { "table": "eqm_operationlog", "column": "eqm_worknote",   "canRead": true, "canCreate": true, "canUpdate": true },
+        { "table": "eqm_operationlog", "column": "eqm_endcomment", "canRead": true, "canCreate": true, "canUpdate": true }
+      ],
+      "$note": "本人が自分の作業内容を入力できる必要があるため、使用者にも canCreate/canUpdate を与える運用にする場合は『設備-稼働ログ入力』プロファイルを別に作り、canRead=false / canCreate=true / canUpdate=true にする。"
+    }
+  ]
+}

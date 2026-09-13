@@ -1,0 +1,313 @@
+{
+  "$comment": "設備管理ソリューション Dataverse スキーマ定義。scripts/Deploy-Schema.ps1 が読み込みます。prefix を変更する場合は本ファイル内の eqm_ をすべて置換してください（公開元の接頭辞は後から変更できません）。",
+  "languageCode": 1041,
+  "prefix": "eqm",
+  "publisher": {
+    "uniqueName": "eqmpublisher",
+    "friendlyName": "設備管理",
+    "customizationPrefix": "eqm",
+    "optionValuePrefix": 63400,
+    "description": "設備管理ソリューション用の公開元"
+  },
+  "solution": {
+    "uniqueName": "EquipmentManagement",
+    "friendlyName": "設備管理",
+    "version": "1.0.0.0",
+    "description": "設備の使用開始／終了、貸出、メンテナンスを管理するソリューション"
+  },
+
+  "tables": [
+    {
+      "schemaName": "eqm_equipmenttype",
+      "entitySetName": "eqm_equipmenttypes",
+      "displayName": "設備種別",
+      "displayCollectionName": "設備種別",
+      "description": "設備の種別マスタ（フェーズ1-1）",
+      "ownershipType": "OrganizationOwned",
+      "primaryName": { "schemaName": "eqm_name", "displayName": "種別名", "maxLength": 100 },
+      "columns": [
+        { "schemaName": "eqm_typecode", "type": "string", "displayName": "種別コード", "maxLength": 20, "required": "ApplicationRequired", "description": "英数字。例: PC, FORKLIFT" },
+        { "schemaName": "eqm_maintenancecycledays", "type": "int", "displayName": "既定メンテ周期日数", "min": 0, "max": 3650, "description": "設備側で個別指定がない場合の既定値" },
+        { "schemaName": "eqm_dailyavailableminutes", "type": "int", "displayName": "既定稼働可能時間", "min": 0, "max": 1440, "description": "稼働率の分母。フェーズ7-5で実データを見て確定する" },
+        { "schemaName": "eqm_sortorder", "type": "int", "displayName": "並び順", "min": 0, "max": 9999 },
+        { "schemaName": "eqm_isactive", "type": "bool", "displayName": "有効", "trueLabel": "有効", "falseLabel": "無効", "default": true }
+      ],
+      "alternateKeys": [
+        { "schemaName": "eqm_typecode_key", "displayName": "種別コード", "columns": ["eqm_typecode"] }
+      ]
+    },
+
+    {
+      "schemaName": "eqm_location",
+      "entitySetName": "eqm_locations",
+      "displayName": "場所",
+      "displayCollectionName": "場所",
+      "description": "設置場所マスタ（フェーズ1-1）。短縮番号の番号帯をここで管理する",
+      "ownershipType": "OrganizationOwned",
+      "primaryName": { "schemaName": "eqm_name", "displayName": "場所名", "maxLength": 100 },
+      "columns": [
+        { "schemaName": "eqm_locationcode", "type": "string", "displayName": "場所コード", "maxLength": 20, "required": "ApplicationRequired" },
+        { "schemaName": "eqm_building", "type": "string", "displayName": "建屋", "maxLength": 50 },
+        { "schemaName": "eqm_floor", "type": "string", "displayName": "階", "maxLength": 20 },
+        { "schemaName": "eqm_numberbandfrom", "type": "string", "displayName": "番号帯開始", "maxLength": 4, "description": "短縮番号の下限。例: 1階=0100" },
+        { "schemaName": "eqm_numberbandto", "type": "string", "displayName": "番号帯終了", "maxLength": 4, "description": "短縮番号の上限。例: 1階=0199" },
+        { "schemaName": "eqm_sortorder", "type": "int", "displayName": "並び順", "min": 0, "max": 9999, "description": "使用者アプリのホーム画面の表示順" },
+        { "schemaName": "eqm_isactive", "type": "bool", "displayName": "有効", "trueLabel": "有効", "falseLabel": "無効", "default": true }
+      ],
+      "alternateKeys": [
+        { "schemaName": "eqm_locationcode_key", "displayName": "場所コード", "columns": ["eqm_locationcode"] }
+      ]
+    },
+
+    {
+      "schemaName": "eqm_department",
+      "entitySetName": "eqm_departments",
+      "displayName": "部署",
+      "displayCollectionName": "部署",
+      "description": "部署マスタ（フェーズ1-1）",
+      "ownershipType": "OrganizationOwned",
+      "primaryName": { "schemaName": "eqm_name", "displayName": "部署名", "maxLength": 100 },
+      "columns": [
+        { "schemaName": "eqm_departmentcode", "type": "string", "displayName": "部署コード", "maxLength": 20, "required": "ApplicationRequired" },
+        { "schemaName": "eqm_sortorder", "type": "int", "displayName": "並び順", "min": 0, "max": 9999 },
+        { "schemaName": "eqm_isactive", "type": "bool", "displayName": "有効", "trueLabel": "有効", "falseLabel": "無効", "default": true }
+      ],
+      "alternateKeys": [
+        { "schemaName": "eqm_departmentcode_key", "displayName": "部署コード", "columns": ["eqm_departmentcode"] }
+      ]
+    },
+
+    {
+      "schemaName": "eqm_user",
+      "entitySetName": "eqm_users",
+      "displayName": "使用者",
+      "displayCollectionName": "使用者",
+      "description": "使用者マスタ（フェーズ1-2）。Entra ID と UPN で突合する",
+      "ownershipType": "OrganizationOwned",
+      "primaryName": { "schemaName": "eqm_name", "displayName": "氏名", "maxLength": 100 },
+      "columns": [
+        { "schemaName": "eqm_employeenumber", "type": "string", "displayName": "社員番号", "maxLength": 20, "required": "ApplicationRequired" },
+        { "schemaName": "eqm_kana", "type": "string", "displayName": "カナ", "maxLength": 100, "description": "設備検索・使用者検索のあいまい検索用" },
+        { "schemaName": "eqm_upn", "type": "string", "displayName": "UPN", "maxLength": 200, "format": "Email", "required": "ApplicationRequired", "description": "小文字で保持する。App.OnStart の突合キー" },
+        { "schemaName": "eqm_entraobjectid", "type": "string", "displayName": "EntraオブジェクトID", "maxLength": 50 },
+        { "schemaName": "eqm_role", "type": "choice", "displayName": "役割", "default": 1,
+          "options": [ { "value": 1, "label": "使用者" }, { "value": 2, "label": "管理者" } ] },
+        { "schemaName": "eqm_isactive", "type": "bool", "displayName": "有効", "trueLabel": "有効", "falseLabel": "無効", "default": true, "description": "退職・異動で false にする。false はアプリでブロックされる" }
+      ],
+      "alternateKeys": [
+        { "schemaName": "eqm_employeenumber_key", "displayName": "社員番号", "columns": ["eqm_employeenumber"] },
+        { "schemaName": "eqm_upn_key", "displayName": "UPN", "columns": ["eqm_upn"] }
+      ]
+    },
+
+    {
+      "schemaName": "eqm_equipment",
+      "entitySetName": "eqm_equipments",
+      "displayName": "設備",
+      "displayCollectionName": "設備",
+      "description": "設備マスタ（フェーズ1-3）。現在のステータスを保持する唯一の場所",
+      "ownershipType": "UserOwned",
+      "primaryName": { "schemaName": "eqm_name", "displayName": "設備名", "maxLength": 100 },
+      "columns": [
+        { "schemaName": "eqm_equipmentcode", "type": "string", "displayName": "設備コード", "maxLength": 30, "required": "ApplicationRequired", "description": "台帳上の正式コード" },
+        { "schemaName": "eqm_shortnumber", "type": "string", "displayName": "短縮番号", "maxLength": 4, "required": "ApplicationRequired", "description": "現場がテンキーで入力する4桁。場所ごとに番号帯を分ける" },
+        { "schemaName": "eqm_model", "type": "string", "displayName": "型式", "maxLength": 100 },
+        { "schemaName": "eqm_serialnumber", "type": "string", "displayName": "製造番号", "maxLength": 100 },
+        { "schemaName": "eqm_installdate", "type": "date", "displayName": "導入日" },
+        { "schemaName": "eqm_status", "type": "choice", "displayName": "ステータス", "default": 1,
+          "description": "アプリとフローだけが更新する。管理者フォームでは読み取り専用にする（フェーズ4-3）",
+          "options": [
+            { "value": 1, "label": "空き" },
+            { "value": 2, "label": "使用中" },
+            { "value": 3, "label": "貸出中" },
+            { "value": 4, "label": "メンテ中" },
+            { "value": 5, "label": "故障" },
+            { "value": 6, "label": "廃棄" }
+          ] },
+        { "schemaName": "eqm_currentstarttime", "type": "datetime", "displayName": "現在の使用開始日時", "behavior": "UserLocal", "description": "長時間稼働の判定に使う（フェーズ5-5）" },
+        { "schemaName": "eqm_labelstatus", "type": "choice", "displayName": "ラベル貼付状況", "default": 1,
+          "description": "展開の律速。未貼付一覧ビューの絞り込み条件（フェーズ4-4）",
+          "options": [
+            { "value": 1, "label": "未貼付" },
+            { "value": 2, "label": "貼付済" },
+            { "value": 3, "label": "要再貼付" }
+          ] },
+        { "schemaName": "eqm_labelapplieddate", "type": "date", "displayName": "ラベル貼付日" },
+        { "schemaName": "eqm_qrvalue", "type": "string", "displayName": "QRコード値", "maxLength": 100, "description": "既定では短縮番号と同じ値を入れる（フェーズ3-11）" },
+        { "schemaName": "eqm_maintenancecycledays", "type": "int", "displayName": "メンテ周期日数", "min": 0, "max": 3650 },
+        { "schemaName": "eqm_lastmaintenancedate", "type": "date", "displayName": "前回メンテ日" },
+        { "schemaName": "eqm_nextmaintenancedate", "type": "date", "displayName": "次回メンテ予定日", "description": "メンテ完了時にフローまたはアプリが再計算する" },
+        { "schemaName": "eqm_dailyavailableminutes", "type": "int", "displayName": "稼働可能時間", "min": 0, "max": 1440, "description": "空欄なら種別の既定値を使う" },
+        { "schemaName": "eqm_isloanable", "type": "bool", "displayName": "貸出可否", "trueLabel": "可", "falseLabel": "不可", "default": true },
+        { "schemaName": "eqm_note", "type": "memo", "displayName": "備考", "maxLength": 2000 }
+      ],
+      "alternateKeys": [
+        { "schemaName": "eqm_equipmentcode_key", "displayName": "設備コード", "columns": ["eqm_equipmentcode"] },
+        { "schemaName": "eqm_shortnumber_key", "displayName": "短縮番号", "columns": ["eqm_shortnumber"] }
+      ]
+    },
+
+    {
+      "schemaName": "eqm_borrower",
+      "entitySetName": "eqm_borrowers",
+      "displayName": "貸出先",
+      "displayCollectionName": "貸出先",
+      "description": "貸出先マスタ（フェーズ1-4）",
+      "ownershipType": "OrganizationOwned",
+      "primaryName": { "schemaName": "eqm_name", "displayName": "貸出先名", "maxLength": 100 },
+      "columns": [
+        { "schemaName": "eqm_borrowercode", "type": "string", "displayName": "貸出先コード", "maxLength": 20, "required": "ApplicationRequired" },
+        { "schemaName": "eqm_borrowertype", "type": "choice", "displayName": "区分", "default": 2,
+          "options": [
+            { "value": 1, "label": "社内部署" },
+            { "value": 2, "label": "協力会社" },
+            { "value": 3, "label": "顧客" },
+            { "value": 4, "label": "その他" }
+          ] },
+        { "schemaName": "eqm_contactperson", "type": "string", "displayName": "担当者名", "maxLength": 100 },
+        { "schemaName": "eqm_contact", "type": "string", "displayName": "連絡先", "maxLength": 100 },
+        { "schemaName": "eqm_isactive", "type": "bool", "displayName": "有効", "trueLabel": "有効", "falseLabel": "無効", "default": true }
+      ],
+      "alternateKeys": [
+        { "schemaName": "eqm_borrowercode_key", "displayName": "貸出先コード", "columns": ["eqm_borrowercode"] }
+      ]
+    },
+
+    {
+      "schemaName": "eqm_operationlog",
+      "entitySetName": "eqm_operationlogs",
+      "displayName": "稼働ログ",
+      "displayCollectionName": "稼働ログ",
+      "description": "設備の使用開始〜終了の1回分（フェーズ1-5）。このテーブルが分析の元データになる",
+      "ownershipType": "UserOwned",
+      "primaryName": { "schemaName": "eqm_name", "displayName": "ログ名", "maxLength": 200, "description": "「短縮番号 氏名 開始日時」を自動で入れる" },
+      "columns": [
+        { "schemaName": "eqm_starttime", "type": "datetime", "displayName": "開始日時", "behavior": "UserLocal", "required": "ApplicationRequired" },
+        { "schemaName": "eqm_endtime", "type": "datetime", "displayName": "終了日時", "behavior": "UserLocal" },
+        { "schemaName": "eqm_durationminutes", "type": "int", "displayName": "稼働時間", "min": 0, "max": 1000000, "description": "終了時にアプリが書き込む。計算列にしたい場合は docs/phase1-data.md を参照" },
+        { "schemaName": "eqm_state", "type": "choice", "displayName": "状態", "default": 1,
+          "options": [
+            { "value": 1, "label": "稼働中" },
+            { "value": 2, "label": "完了" },
+            { "value": 3, "label": "強制終了" }
+          ] },
+        { "schemaName": "eqm_purpose", "type": "choice", "displayName": "用途", "default": 1,
+          "options": [
+            { "value": 1, "label": "通常作業" },
+            { "value": 2, "label": "段取り" },
+            { "value": 3, "label": "試験・検査" },
+            { "value": 4, "label": "その他" }
+          ] },
+        { "schemaName": "eqm_worknote", "type": "memo", "displayName": "作業内容", "maxLength": 2000, "columnSecurity": true, "description": "列レベルセキュリティ対象（フェーズ1-9）" },
+        { "schemaName": "eqm_endcomment", "type": "memo", "displayName": "終了時コメント", "maxLength": 1000, "columnSecurity": true, "description": "列レベルセキュリティ対象（フェーズ1-9）" },
+        { "schemaName": "eqm_source", "type": "choice", "displayName": "登録元", "default": 1,
+          "options": [
+            { "value": 1, "label": "アプリ" },
+            { "value": 2, "label": "手動" },
+            { "value": 3, "label": "フロー" }
+          ] },
+        { "schemaName": "eqm_forcedreason", "type": "string", "displayName": "強制終了理由", "maxLength": 200 },
+        { "schemaName": "eqm_notified24h", "type": "bool", "displayName": "長時間通知済み", "trueLabel": "通知済み", "falseLabel": "未通知", "default": false, "description": "既定では使いません。フェーズ5-5 は計画どおり最小構成（毎日そのまま通知）で運用します。毎日の再通知が煩わしくなったときに使える受け皿として列だけ用意しています" }
+      ],
+      "alternateKeys": []
+    },
+
+    {
+      "schemaName": "eqm_loan",
+      "entitySetName": "eqm_loans",
+      "displayName": "貸出",
+      "displayCollectionName": "貸出",
+      "description": "設備の貸出1件分（フェーズ1-6）",
+      "ownershipType": "UserOwned",
+      "primaryName": { "schemaName": "eqm_name", "displayName": "貸出番号", "maxLength": 100 },
+      "columns": [
+        { "schemaName": "eqm_loantype", "type": "choice", "displayName": "貸出区分", "default": 1, "required": "ApplicationRequired",
+          "description": "ビジネスルールの分岐条件（フェーズ1-10）",
+          "options": [ { "value": 1, "label": "社内" }, { "value": 2, "label": "社外" } ] },
+        { "schemaName": "eqm_loandate", "type": "date", "displayName": "貸出日", "required": "ApplicationRequired" },
+        { "schemaName": "eqm_duedate", "type": "date", "displayName": "返却予定日", "required": "ApplicationRequired" },
+        { "schemaName": "eqm_returndate", "type": "date", "displayName": "返却日" },
+        { "schemaName": "eqm_state", "type": "choice", "displayName": "状態", "default": 1,
+          "options": [
+            { "value": 1, "label": "貸出中" },
+            { "value": 2, "label": "返却済" },
+            { "value": 3, "label": "延滞" }
+          ] },
+        { "schemaName": "eqm_conditionout", "type": "memo", "displayName": "貸出時メモ", "maxLength": 1000 },
+        { "schemaName": "eqm_conditionin", "type": "memo", "displayName": "返却時メモ", "maxLength": 1000 },
+        { "schemaName": "eqm_overduenotified", "type": "bool", "displayName": "延滞通知済み", "trueLabel": "通知済み", "falseLabel": "未通知", "default": false }
+      ],
+      "alternateKeys": []
+    }
+  ],
+
+  "relationships": [
+    { "schemaName": "eqm_department_parentdepartment", "referenced": "eqm_department", "referencing": "eqm_department",
+      "lookup": { "schemaName": "eqm_ParentDepartmentId", "displayName": "上位部署" },
+      "cascade": "Restrict", "menu": { "label": "下位部署", "group": "Details", "order": 10000 } },
+
+    { "schemaName": "eqm_user_department", "referenced": "eqm_department", "referencing": "eqm_user",
+      "lookup": { "schemaName": "eqm_DepartmentId", "displayName": "部署" },
+      "cascade": "Restrict", "menu": { "label": "使用者", "group": "Details", "order": 10010 } },
+
+    { "schemaName": "eqm_user_defaultlocation", "referenced": "eqm_location", "referencing": "eqm_user",
+      "lookup": { "schemaName": "eqm_DefaultLocationId", "displayName": "既定の場所" },
+      "cascade": "Restrict", "menu": { "label": "この場所を既定とする使用者", "group": "Details", "order": 10020 } },
+
+    { "schemaName": "eqm_equipment_equipmenttype", "referenced": "eqm_equipmenttype", "referencing": "eqm_equipment",
+      "lookup": { "schemaName": "eqm_EquipmentTypeId", "displayName": "種別", "required": "ApplicationRequired" },
+      "cascade": "Restrict", "menu": { "label": "設備", "group": "Details", "order": 10000 } },
+
+    { "schemaName": "eqm_equipment_location", "referenced": "eqm_location", "referencing": "eqm_equipment",
+      "lookup": { "schemaName": "eqm_LocationId", "displayName": "場所", "required": "ApplicationRequired" },
+      "cascade": "Restrict", "menu": { "label": "設備", "group": "Details", "order": 10000 } },
+
+    { "schemaName": "eqm_equipment_department", "referenced": "eqm_department", "referencing": "eqm_equipment",
+      "lookup": { "schemaName": "eqm_DepartmentId", "displayName": "管理部署" },
+      "cascade": "Restrict", "menu": { "label": "管理する設備", "group": "Details", "order": 10030 } },
+
+    { "schemaName": "eqm_equipment_currentuser", "referenced": "eqm_user", "referencing": "eqm_equipment",
+      "lookup": { "schemaName": "eqm_CurrentUserId", "displayName": "現在の使用者" },
+      "cascade": "RemoveLink", "menu": { "label": "使用中の設備", "group": "Details", "order": 10000 } },
+
+    { "schemaName": "eqm_equipment_currentlog", "referenced": "eqm_operationlog", "referencing": "eqm_equipment",
+      "lookup": { "schemaName": "eqm_CurrentLogId", "displayName": "現在の稼働ログ" },
+      "cascade": "RemoveLink", "menu": { "label": "現在ログとする設備", "group": "Details", "order": 10040 } },
+
+    { "schemaName": "eqm_operationlog_equipment", "referenced": "eqm_equipment", "referencing": "eqm_operationlog",
+      "lookup": { "schemaName": "eqm_EquipmentId", "displayName": "設備", "required": "ApplicationRequired" },
+      "cascade": "Cascade", "menu": { "label": "稼働ログ", "group": "Details", "order": 10010 } },
+
+    { "schemaName": "eqm_operationlog_user", "referenced": "eqm_user", "referencing": "eqm_operationlog",
+      "lookup": { "schemaName": "eqm_UserId", "displayName": "使用者" },
+      "cascade": "Restrict", "menu": { "label": "稼働ログ", "group": "Details", "order": 10010 } },
+
+    { "schemaName": "eqm_operationlog_location", "referenced": "eqm_location", "referencing": "eqm_operationlog",
+      "lookup": { "schemaName": "eqm_LocationId", "displayName": "開始場所" },
+      "cascade": "Restrict", "menu": { "label": "稼働ログ", "group": "Details", "order": 10010 } },
+
+    { "schemaName": "eqm_operationlog_forcedby", "referenced": "eqm_user", "referencing": "eqm_operationlog",
+      "lookup": { "schemaName": "eqm_ForcedByUserId", "displayName": "強制終了者" },
+      "cascade": "Restrict", "menu": { "label": "強制終了した稼働ログ", "group": "Details", "order": 10020 } },
+
+    { "schemaName": "eqm_loan_equipment", "referenced": "eqm_equipment", "referencing": "eqm_loan",
+      "lookup": { "schemaName": "eqm_EquipmentId", "displayName": "設備", "required": "ApplicationRequired" },
+      "cascade": "Cascade", "menu": { "label": "貸出", "group": "Details", "order": 10020 } },
+
+    { "schemaName": "eqm_loan_borrower", "referenced": "eqm_borrower", "referencing": "eqm_loan",
+      "lookup": { "schemaName": "eqm_BorrowerId", "displayName": "貸出先" },
+      "cascade": "Restrict", "menu": { "label": "貸出", "group": "Details", "order": 10000 } },
+
+    { "schemaName": "eqm_loan_department", "referenced": "eqm_department", "referencing": "eqm_loan",
+      "lookup": { "schemaName": "eqm_DepartmentId", "displayName": "貸出先部署" },
+      "cascade": "Restrict", "menu": { "label": "貸出", "group": "Details", "order": 10040 } },
+
+    { "schemaName": "eqm_loan_carrier", "referenced": "eqm_user", "referencing": "eqm_loan",
+      "lookup": { "schemaName": "eqm_CarrierUserId", "displayName": "持出者" },
+      "cascade": "Restrict", "menu": { "label": "持ち出した貸出", "group": "Details", "order": 10030 } },
+
+    { "schemaName": "eqm_loan_approver", "referenced": "eqm_user", "referencing": "eqm_loan",
+      "lookup": { "schemaName": "eqm_ApproverUserId", "displayName": "承認者" },
+      "cascade": "Restrict", "menu": { "label": "承認した貸出", "group": "Details", "order": 10040 } }
+  ]
+}
