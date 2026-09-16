@@ -11,6 +11,7 @@
       3. CSV の見出しがスキーマの表示名と一致しているか
       4. セキュリティ定義が実在するテーブル・列を指しているか
       5. 表示名が Power Fx でそのまま書けるか（空白・記号・数字始まりがないか）
+      6. 管理者アプリの定義（solution/app-definition.json）が実在する列・テーブルを指しているか
 .EXAMPLE
     .\Test-Solution.ps1
 #>
@@ -256,11 +257,107 @@ foreach ($p in $sec.columnSecurityProfiles) {
 
 #endregion
 
+#region ---------- 6. 管理者アプリの定義 ----------
+
+$appFile = Join-Path $Root 'solution\app-definition.json'
+if (Test-Path -LiteralPath $appFile) {
+    Write-Step '管理者アプリの定義を検査しています'
+    $appDef = Get-Content -LiteralPath $appFile -Raw -Encoding UTF8 | ConvertFrom-Json
+
+    # テーブル論理名 -> 使える列（論理名）
+    $logicalCols = @{}
+    foreach ($t in $schema.tables) {
+        $tl = $t.schemaName.ToLower()
+        $set = New-Object System.Collections.Generic.HashSet[string]
+        [void]$set.Add($t.primaryName.schemaName.ToLower())
+        foreach ($c in $t.columns) { [void]$set.Add($c.schemaName.ToLower()) }
+        [void]$set.Add("${tl}id")
+        foreach ($sys in 'statecode','statuscode','createdon','modifiedon','ownerid','createdby','modifiedby') { [void]$set.Add($sys) }
+        $logicalCols[$tl] = $set
+    }
+    foreach ($r in $schema.relationships) { [void]$logicalCols[$r.referencing.ToLower()].Add($r.lookup.schemaName.ToLower()) }
+    $relNames = @($schema.relationships | ForEach-Object { $_.schemaName })
+
+    function Test-AppTable {
+        param([string]$Table, [string]$Where)
+        if (-not $logicalCols.ContainsKey($Table)) { Add-Problem 'アプリ定義' "$Where : テーブル $Table がスキーマにありません"; return $false }
+        return $true
+    }
+    function Test-AppColumn {
+        param([string]$Table, [string]$Column, [string]$Where)
+        if (-not $logicalCols.ContainsKey($Table)) { return }
+        if (-not $logicalCols[$Table].Contains($Column.ToLower())) { Add-Problem 'アプリ定義' "$Where : 列 $Column が $Table にありません" }
+    }
+
+    # ビュー
+    $viewKeys = New-Object System.Collections.Generic.HashSet[string]
+    foreach ($v in $appDef.views) {
+        $where = "ビュー『$($v.name)』"
+        [void]$viewKeys.Add("$($v.table)|$($v.name)")
+        if (-not (Test-AppTable -Table $v.table -Where $where)) { continue }
+        foreach ($c in $v.columns) { Test-AppColumn -Table $v.table -Column $c.name -Where $where }
+        foreach ($o in $v.order)   { Test-AppColumn -Table $v.table -Column $o.attribute -Where "$where の並べ替え" }
+        function Test-AppFilter {
+            param($Filter, [string]$Table, [string]$Where)
+            if (-not $Filter) { return }
+            if ($Filter.PSObject.Properties.Name -contains 'conditions') {
+                foreach ($c in $Filter.conditions) { Test-AppColumn -Table $Table -Column $c.attribute -Where "$Where の絞り込み" }
+            }
+            if ($Filter.PSObject.Properties.Name -contains 'filters') {
+                foreach ($f in $Filter.filters) { Test-AppFilter -Filter $f -Table $Table -Where $Where }
+            }
+        }
+        Test-AppFilter -Filter $v.filter -Table $v.table -Where $where
+    }
+    $dupViews = @($appDef.views | Group-Object { "$($_.table)|$($_.name)" } | Where-Object { $_.Count -gt 1 })
+    foreach ($d in $dupViews) { Add-Problem 'アプリ定義' "ビュー名が同じテーブル内で重複しています: $($d.Name)" }
+
+    # フォーム
+    foreach ($f in $appDef.forms) {
+        $where = "フォーム『$($f.label)』"
+        if (-not (Test-AppTable -Table $f.table -Where $where)) { continue }
+        foreach ($tab in $f.tabs) {
+            foreach ($sec in $tab.sections) {
+                if ($sec.PSObject.Properties.Name -contains 'subgrid' -and $sec.subgrid) {
+                    $sg = $sec.subgrid
+                    Test-AppTable -Table $sg.table -Where "$where のサブグリッド" | Out-Null
+                    if ($relNames -notcontains $sg.relationship) { Add-Problem 'アプリ定義' "$where : リレーション $($sg.relationship) がスキーマにありません" }
+                    if (-not $viewKeys.Contains("$($sg.table)|$($sg.view)")) { Add-Problem 'アプリ定義' "$where : サブグリッドが参照するビュー『$($sg.view)』($($sg.table)) が定義されていません" }
+                } else {
+                    foreach ($col in $sec.columns) { Test-AppColumn -Table $f.table -Column $col -Where "$where / $($sec.label)" }
+                }
+            }
+        }
+    }
+    $formTables = @($appDef.forms | ForEach-Object { $_.table })
+    foreach ($t in $schema.tables) {
+        if ($formTables -notcontains $t.schemaName.ToLower()) {
+            Write-Host "    （参考）$($t.displayName) のフォームがアプリ定義にありません。既定のフォームが使われます" -ForegroundColor DarkGray
+        }
+    }
+
+    # サイトマップ
+    $subIds = @()
+    foreach ($area in $appDef.sitemap.areas) {
+        foreach ($group in $area.groups) {
+            foreach ($sub in $group.subAreas) {
+                $subIds += $sub.id
+                Test-AppTable -Table $sub.table -Where "サイトマップのサブエリア $($sub.id)" | Out-Null
+            }
+        }
+    }
+    foreach ($d in @($subIds | Group-Object | Where-Object { $_.Count -gt 1 })) {
+        Add-Problem 'アプリ定義' "サイトマップのサブエリア Id が重複しています: $($d.Name)"
+    }
+}
+
+#endregion
+
 #region ---------- 結果 ----------
 
 Write-Host ''
 if ($script:Problems.Count -eq 0) {
-    Write-Info "問題は見つかりませんでした（テーブル $($schema.tables.Count) / リレーション $($schema.relationships.Count) / 数式 $($fxFiles.Count) ファイル）"
+    Write-Info "問題は見つかりませんでした（テーブル $($schema.tables.Count) / リレーション $($schema.relationships.Count) / 数式 $($fxFiles.Count) ファイル / アプリ定義 フォーム $(@($appDef.forms).Count)・ビュー $(@($appDef.views).Count)）"
     Write-Host ''
     exit 0
 }

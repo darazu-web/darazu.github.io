@@ -7,8 +7,8 @@ Windows の PowerShell から実行できるスクリプトで、Dataverse の�
 
 | 作るもの | 使う人 | 実体 |
 |---|---|---|
-| 使用者アプリ | 現場 | キャンバスアプリ（番号を入れて使用開始・終了） |
-| 管理者アプリ | 保全部など | モデル駆動アプリ（マスタ保守・状態の修正） |
+| 使用者アプリ | 現場 | キャンバスアプリ（番号を入れて使用開始・終了）／数式を貼り付けて作る |
+| 管理者アプリ | 保全部など | モデル駆動アプリ（マスタ保守・状態の修正）／**ソリューション zip を取り込むだけ** |
 | 自動化 | — | Power Automate フロー5本（通知・整合性チェック） |
 | 印刷物 | 現場 | 設備ラベル（QR付き）と A4 1枚の操作説明 |
 
@@ -31,7 +31,7 @@ Windows の PowerShell から実行できるスクリプトで、Dataverse の�
 | 1 | データ層（テーブル・代替キー・権限・ビジネスルール） | [docs/phase1-data.md](docs/phase1-data.md) |
 | 2 | 初期データ投入（マスタ・短縮番号の採番） | [docs/phase2-initial-data.md](docs/phase2-initial-data.md) |
 | 3 | 使用者アプリ | [docs/phase3-user-app.md](docs/phase3-user-app.md) |
-| 4 | 管理者アプリ | [docs/phase4-admin-app.md](docs/phase4-admin-app.md) |
+| 4 | 管理者アプリ（**ソリューション zip で取り込めます**） | [docs/phase4-admin-app.md](docs/phase4-admin-app.md) / [solution/README.md](solution/README.md) |
 | 5 | 自動化（フロー5本） | [docs/phase5-automation.md](docs/phase5-automation.md) |
 | 6 | パイロット（1エリア・20台・4週間） | [docs/phase6-pilot.md](docs/phase6-pilot.md) |
 | 7 | 本展開 | [docs/phase7-rollout.md](docs/phase7-rollout.md) |
@@ -76,6 +76,13 @@ cd equipment-management\scripts
 .\Import-MasterData.ps1 -EnvironmentUrl 'https://<組織名>.crm7.dynamics.com' -All
 ```
 
+そのあと、管理者アプリ（フォーム・ビュー・サイトマップ）はソリューションの取り込みで入ります。
+
+```
+make.powerapps.com > ソリューション > ソリューションのインポート
+  → solution\dist\EquipmentManagementApp_1_0_0_0.zip
+```
+
 スクリプトは**何度実行しても安全**です。既にあるものは作らずスキップし、
 データは代替キーによる upsert なので重複しません。途中で失敗したら、直して同じコマンドを流し直してください。
 
@@ -95,7 +102,12 @@ equipment-management/
     Deploy-Security.ps1         フェーズ1-8, 1-9
     Import-MasterData.ps1       フェーズ2-1〜2-3
     New-ShortNumber.ps1         フェーズ2-4（通信しない）
-    Test-Solution.ps1           整合性チェック（通信しない）
+    Test-Solution.ps1           整合性チェック（通信しない。アプリ定義のずれも見る）
+  solution/                   管理者アプリのソリューション（フェーズ4）
+    app-definition.json         フォーム8・ビュー26・サイトマップの定義
+    Build-Solution.ps1          zip を組み立てる（通信しない）
+    Test-SolutionPackage.ps1    取り込む前に zip を検査する（通信しない）
+    dist/                       取り込める zip
   powerfx/                    キャンバスアプリの数式（フェーズ3）
   flows/                      Power Automate フローの仕様（フェーズ5）
   data/                       初期データの CSV 雛形
@@ -133,8 +145,10 @@ equipment-management/
 3. CSV の見出しがスキーマの表示名と一致しているか
 4. セキュリティ定義が実在するテーブル・列を指しているか
 5. 表示名が Power Fx でそのまま書けるか（空白・記号・数字始まりがないか）
+6. 管理者アプリの定義が実在する列・テーブルを指しているか
 
 **スキーマを触ったら必ず流してください。**
+列名を1つ変えると、数式・CSV・セキュリティ定義に加えて、アプリのビューとフォームもずれます。
 
 ## 落とし穴（先に読んでおくと得をするもの）
 

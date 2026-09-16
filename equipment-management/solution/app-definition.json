@@ -1,0 +1,1804 @@
+{
+  "$comment": "管理者アプリ（モデル駆動）の定義。solution/Build-Solution.ps1 がこれと schema/dataverse-schema.json からソリューション zip を組み立てます。列は論理名（すべて小文字）で解決されます。公開元と接頭辞は schema/dataverse-schema.json 側が正で、ここには持ちません。",
+  "languageCode": 1041,
+  "solution": {
+    "uniqueName": "EquipmentManagementApp",
+    "friendlyName": "設備管理アプリ",
+    "version": "1.0.0.0",
+    "description": "設備管理の管理者アプリ（フォーム・ビュー・サイトマップ）。先にテーブルを作成しておく必要があります。"
+  },
+  "app": {
+    "uniqueName": "eqm_equipmentadmin",
+    "name": "設備管理（管理者）",
+    "description": "設備のマスタ保守、稼働ログと貸出の確認、状態の修正を行います。"
+  },
+  "forms": [
+    {
+      "table": "eqm_equipment",
+      "label": "設備",
+      "tabs": [
+        {
+          "name": "tab_basic",
+          "label": "基本情報",
+          "sections": [
+            {
+              "name": "sec_identity",
+              "label": "識別",
+              "columns": [
+                "eqm_equipmentcode",
+                "eqm_shortnumber",
+                "eqm_name"
+              ]
+            },
+            {
+              "name": "sec_place",
+              "label": "分類と場所",
+              "columns": [
+                "eqm_EquipmentTypeId",
+                "eqm_LocationId",
+                "eqm_DepartmentId"
+              ]
+            },
+            {
+              "name": "sec_spec",
+              "label": "仕様",
+              "columns": [
+                "eqm_model",
+                "eqm_serialnumber",
+                "eqm_installdate",
+                "eqm_isloanable"
+              ]
+            },
+            {
+              "name": "sec_note",
+              "label": "備考",
+              "columns": [
+                "eqm_note"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "tab_state",
+          "label": "状態",
+          "sections": [
+            {
+              "name": "sec_current",
+              "label": "現在の状態（アプリとフローだけが更新します）",
+              "readOnly": true,
+              "columns": [
+                "eqm_status",
+                "eqm_CurrentUserId",
+                "eqm_CurrentLogId",
+                "eqm_currentstarttime"
+              ]
+            },
+            {
+              "name": "sec_label",
+              "label": "ラベル",
+              "columns": [
+                "eqm_labelstatus",
+                "eqm_labelapplieddate",
+                "eqm_qrvalue"
+              ]
+            },
+            {
+              "name": "sec_loggrid",
+              "label": "稼働ログ",
+              "subgrid": {
+                "table": "eqm_operationlog",
+                "relationship": "eqm_operationlog_equipment",
+                "view": "設備別の稼働ログ",
+                "rows": 8
+              }
+            }
+          ]
+        },
+        {
+          "name": "tab_maint",
+          "label": "メンテナンス",
+          "sections": [
+            {
+              "name": "sec_maint",
+              "label": "メンテナンス",
+              "columns": [
+                "eqm_maintenancecycledays",
+                "eqm_lastmaintenancedate",
+                "eqm_nextmaintenancedate",
+                "eqm_dailyavailableminutes"
+              ]
+            },
+            {
+              "name": "sec_loangrid",
+              "label": "貸出",
+              "subgrid": {
+                "table": "eqm_loan",
+                "relationship": "eqm_loan_equipment",
+                "view": "設備別の貸出",
+                "rows": 8
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "table": "eqm_operationlog",
+      "label": "稼働ログ",
+      "tabs": [
+        {
+          "name": "tab_general",
+          "label": "情報",
+          "sections": [
+            {
+              "name": "sec_what",
+              "label": "対象",
+              "columns": [
+                "eqm_name",
+                "eqm_EquipmentId",
+                "eqm_UserId",
+                "eqm_LocationId"
+              ]
+            },
+            {
+              "name": "sec_time",
+              "label": "時間",
+              "columns": [
+                "eqm_starttime",
+                "eqm_endtime",
+                "eqm_durationminutes",
+                "eqm_state",
+                "eqm_purpose"
+              ]
+            },
+            {
+              "name": "sec_body",
+              "label": "内容",
+              "columns": [
+                "eqm_worknote",
+                "eqm_endcomment"
+              ]
+            },
+            {
+              "name": "sec_forced",
+              "label": "強制終了",
+              "columns": [
+                "eqm_ForcedByUserId",
+                "eqm_forcedreason",
+                "eqm_source",
+                "eqm_notified24h"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "table": "eqm_loan",
+      "label": "貸出",
+      "tabs": [
+        {
+          "name": "tab_general",
+          "label": "情報",
+          "sections": [
+            {
+              "name": "sec_what",
+              "label": "対象",
+              "columns": [
+                "eqm_name",
+                "eqm_EquipmentId",
+                "eqm_loantype"
+              ]
+            },
+            {
+              "name": "sec_who",
+              "label": "貸出先",
+              "columns": [
+                "eqm_BorrowerId",
+                "eqm_DepartmentId",
+                "eqm_CarrierUserId",
+                "eqm_ApproverUserId"
+              ]
+            },
+            {
+              "name": "sec_when",
+              "label": "日付",
+              "columns": [
+                "eqm_loandate",
+                "eqm_duedate",
+                "eqm_returndate",
+                "eqm_state",
+                "eqm_overduenotified"
+              ]
+            },
+            {
+              "name": "sec_memo",
+              "label": "状態メモ",
+              "columns": [
+                "eqm_conditionout",
+                "eqm_conditionin"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "table": "eqm_user",
+      "label": "使用者",
+      "tabs": [
+        {
+          "name": "tab_general",
+          "label": "情報",
+          "sections": [
+            {
+              "name": "sec_id",
+              "label": "本人",
+              "columns": [
+                "eqm_employeenumber",
+                "eqm_name",
+                "eqm_kana"
+              ]
+            },
+            {
+              "name": "sec_entra",
+              "label": "Entra との突合",
+              "columns": [
+                "eqm_upn",
+                "eqm_entraobjectid"
+              ]
+            },
+            {
+              "name": "sec_org",
+              "label": "所属",
+              "columns": [
+                "eqm_DepartmentId",
+                "eqm_DefaultLocationId",
+                "eqm_role",
+                "eqm_isactive"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "table": "eqm_equipmenttype",
+      "label": "設備種別",
+      "tabs": [
+        {
+          "name": "tab_general",
+          "label": "情報",
+          "sections": [
+            {
+              "name": "sec_general",
+              "label": "設備種別",
+              "columns": [
+                "eqm_typecode",
+                "eqm_name",
+                "eqm_maintenancecycledays",
+                "eqm_dailyavailableminutes",
+                "eqm_sortorder",
+                "eqm_isactive"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "table": "eqm_location",
+      "label": "場所",
+      "tabs": [
+        {
+          "name": "tab_general",
+          "label": "情報",
+          "sections": [
+            {
+              "name": "sec_general",
+              "label": "場所",
+              "columns": [
+                "eqm_locationcode",
+                "eqm_name",
+                "eqm_building",
+                "eqm_floor",
+                "eqm_sortorder",
+                "eqm_isactive"
+              ]
+            },
+            {
+              "name": "sec_band",
+              "label": "短縮番号の番号帯",
+              "columns": [
+                "eqm_numberbandfrom",
+                "eqm_numberbandto"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "table": "eqm_department",
+      "label": "部署",
+      "tabs": [
+        {
+          "name": "tab_general",
+          "label": "情報",
+          "sections": [
+            {
+              "name": "sec_general",
+              "label": "部署",
+              "columns": [
+                "eqm_departmentcode",
+                "eqm_name",
+                "eqm_ParentDepartmentId",
+                "eqm_sortorder",
+                "eqm_isactive"
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "table": "eqm_borrower",
+      "label": "貸出先",
+      "tabs": [
+        {
+          "name": "tab_general",
+          "label": "情報",
+          "sections": [
+            {
+              "name": "sec_general",
+              "label": "貸出先",
+              "columns": [
+                "eqm_borrowercode",
+                "eqm_name",
+                "eqm_borrowertype",
+                "eqm_isactive"
+              ]
+            },
+            {
+              "name": "sec_contact",
+              "label": "連絡先",
+              "columns": [
+                "eqm_contactperson",
+                "eqm_contact"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "views": [
+    {
+      "name": "アクティブな設備",
+      "table": "eqm_equipment",
+      "description": "廃棄を除いたすべての設備",
+      "columns": [
+        {
+          "name": "eqm_shortnumber",
+          "width": 90
+        },
+        {
+          "name": "eqm_name",
+          "width": 220
+        },
+        {
+          "name": "eqm_equipmenttypeid",
+          "width": 120
+        },
+        {
+          "name": "eqm_locationid",
+          "width": 120
+        },
+        {
+          "name": "eqm_status",
+          "width": 100
+        },
+        {
+          "name": "eqm_labelstatus",
+          "width": 110
+        },
+        {
+          "name": "eqm_departmentid",
+          "width": 120
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_shortnumber",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_status",
+            "operator": "ne",
+            "value": "6"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "使用中の設備",
+      "table": "eqm_equipment",
+      "description": "いま誰かが使用している設備。開始が古い順",
+      "columns": [
+        {
+          "name": "eqm_shortnumber",
+          "width": 90
+        },
+        {
+          "name": "eqm_name",
+          "width": 220
+        },
+        {
+          "name": "eqm_locationid",
+          "width": 120
+        },
+        {
+          "name": "eqm_currentuserid",
+          "width": 140
+        },
+        {
+          "name": "eqm_currentstarttime",
+          "width": 160
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_currentstarttime",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_status",
+            "operator": "eq",
+            "value": "2"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "長時間稼働中の設備",
+      "table": "eqm_equipment",
+      "description": "24時間以上「使用中」のまま。終了忘れの疑い（フェーズ5-5）",
+      "columns": [
+        {
+          "name": "eqm_shortnumber",
+          "width": 90
+        },
+        {
+          "name": "eqm_name",
+          "width": 220
+        },
+        {
+          "name": "eqm_locationid",
+          "width": 120
+        },
+        {
+          "name": "eqm_currentuserid",
+          "width": 140
+        },
+        {
+          "name": "eqm_currentstarttime",
+          "width": 160
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_currentstarttime",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_status",
+            "operator": "eq",
+            "value": "2"
+          },
+          {
+            "attribute": "eqm_currentstarttime",
+            "operator": "olderthan-x-hours",
+            "value": "24"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "ラベル未貼付一覧",
+      "table": "eqm_equipment",
+      "description": "貼付作業の進捗管理に使う。場所順に並べてある（フェーズ4-4）",
+      "columns": [
+        {
+          "name": "eqm_shortnumber",
+          "width": 90
+        },
+        {
+          "name": "eqm_name",
+          "width": 220
+        },
+        {
+          "name": "eqm_locationid",
+          "width": 120
+        },
+        {
+          "name": "eqm_equipmenttypeid",
+          "width": 120
+        },
+        {
+          "name": "eqm_labelstatus",
+          "width": 110
+        },
+        {
+          "name": "eqm_departmentid",
+          "width": 120
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_locationid",
+          "descending": false
+        },
+        {
+          "attribute": "eqm_shortnumber",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_status",
+            "operator": "ne",
+            "value": "6"
+          }
+        ],
+        "filters": [
+          {
+            "type": "or",
+            "conditions": [
+              {
+                "attribute": "eqm_labelstatus",
+                "operator": "eq",
+                "value": "1"
+              },
+              {
+                "attribute": "eqm_labelstatus",
+                "operator": "eq",
+                "value": "3"
+              }
+            ],
+            "filters": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "メンテ期限切れの設備",
+      "table": "eqm_equipment",
+      "description": "次回メンテ予定日が昨日以前。今日ぶんは「メンテ期限が近い設備」に出る",
+      "columns": [
+        {
+          "name": "eqm_shortnumber",
+          "width": 90
+        },
+        {
+          "name": "eqm_name",
+          "width": 220
+        },
+        {
+          "name": "eqm_locationid",
+          "width": 120
+        },
+        {
+          "name": "eqm_nextmaintenancedate",
+          "width": 120
+        },
+        {
+          "name": "eqm_lastmaintenancedate",
+          "width": 120
+        },
+        {
+          "name": "eqm_status",
+          "width": 100
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_nextmaintenancedate",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_status",
+            "operator": "ne",
+            "value": "6"
+          },
+          {
+            "attribute": "eqm_nextmaintenancedate",
+            "operator": "olderthan-x-days",
+            "value": "1"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "メンテ期限が近い設備",
+      "table": "eqm_equipment",
+      "description": "今日から7日以内にメンテ予定（フェーズ5-2 の通知と同じ範囲）",
+      "columns": [
+        {
+          "name": "eqm_shortnumber",
+          "width": 90
+        },
+        {
+          "name": "eqm_name",
+          "width": 220
+        },
+        {
+          "name": "eqm_locationid",
+          "width": 120
+        },
+        {
+          "name": "eqm_nextmaintenancedate",
+          "width": 120
+        },
+        {
+          "name": "eqm_maintenancecycledays",
+          "width": 110
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_nextmaintenancedate",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_status",
+            "operator": "ne",
+            "value": "6"
+          },
+          {
+            "attribute": "eqm_nextmaintenancedate",
+            "operator": "next-x-days",
+            "value": "7"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "メンテ期限が未設定の設備",
+      "table": "eqm_equipment",
+      "description": "次回メンテ予定日が空。通知フローに拾われないので月1回は確認する",
+      "columns": [
+        {
+          "name": "eqm_shortnumber",
+          "width": 90
+        },
+        {
+          "name": "eqm_name",
+          "width": 220
+        },
+        {
+          "name": "eqm_locationid",
+          "width": 120
+        },
+        {
+          "name": "eqm_equipmenttypeid",
+          "width": 120
+        },
+        {
+          "name": "eqm_maintenancecycledays",
+          "width": 110
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_locationid",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_status",
+            "operator": "ne",
+            "value": "6"
+          },
+          {
+            "attribute": "eqm_nextmaintenancedate",
+            "operator": "null"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "故障・メンテ中の設備",
+      "table": "eqm_equipment",
+      "description": "いま使えない設備",
+      "columns": [
+        {
+          "name": "eqm_shortnumber",
+          "width": 90
+        },
+        {
+          "name": "eqm_name",
+          "width": 220
+        },
+        {
+          "name": "eqm_locationid",
+          "width": 120
+        },
+        {
+          "name": "eqm_status",
+          "width": 100
+        },
+        {
+          "name": "eqm_note",
+          "width": 260
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_locationid",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          }
+        ],
+        "filters": [
+          {
+            "type": "or",
+            "conditions": [
+              {
+                "attribute": "eqm_status",
+                "operator": "eq",
+                "value": "4"
+              },
+              {
+                "attribute": "eqm_status",
+                "operator": "eq",
+                "value": "5"
+              }
+            ],
+            "filters": []
+          }
+        ]
+      }
+    },
+    {
+      "name": "アクティブな稼働ログ",
+      "table": "eqm_operationlog",
+      "description": "すべての稼働ログ。新しい順",
+      "columns": [
+        {
+          "name": "eqm_equipmentid",
+          "width": 160
+        },
+        {
+          "name": "eqm_userid",
+          "width": 120
+        },
+        {
+          "name": "eqm_starttime",
+          "width": 150
+        },
+        {
+          "name": "eqm_endtime",
+          "width": 150
+        },
+        {
+          "name": "eqm_durationminutes",
+          "width": 100
+        },
+        {
+          "name": "eqm_state",
+          "width": 100
+        },
+        {
+          "name": "eqm_purpose",
+          "width": 110
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_starttime",
+          "descending": true
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "本日のログ",
+      "table": "eqm_operationlog",
+      "description": "今日ぶんの稼働ログ（フェーズ4-5）",
+      "columns": [
+        {
+          "name": "eqm_equipmentid",
+          "width": 160
+        },
+        {
+          "name": "eqm_userid",
+          "width": 120
+        },
+        {
+          "name": "eqm_starttime",
+          "width": 150
+        },
+        {
+          "name": "eqm_endtime",
+          "width": 150
+        },
+        {
+          "name": "eqm_durationminutes",
+          "width": 100
+        },
+        {
+          "name": "eqm_state",
+          "width": 100
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_starttime",
+          "descending": true
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_starttime",
+            "operator": "today"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "稼働中のログ",
+      "table": "eqm_operationlog",
+      "description": "まだ終了していない稼働ログ",
+      "columns": [
+        {
+          "name": "eqm_equipmentid",
+          "width": 160
+        },
+        {
+          "name": "eqm_userid",
+          "width": 120
+        },
+        {
+          "name": "eqm_starttime",
+          "width": 150
+        },
+        {
+          "name": "eqm_locationid",
+          "width": 120
+        },
+        {
+          "name": "eqm_purpose",
+          "width": 110
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_starttime",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_state",
+            "operator": "eq",
+            "value": "1"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "強制終了されたログ",
+      "table": "eqm_operationlog",
+      "description": "管理者が強制終了したログ。繰り返し出るなら原因を調べる",
+      "columns": [
+        {
+          "name": "eqm_equipmentid",
+          "width": 160
+        },
+        {
+          "name": "eqm_userid",
+          "width": 120
+        },
+        {
+          "name": "eqm_starttime",
+          "width": 150
+        },
+        {
+          "name": "eqm_endtime",
+          "width": 150
+        },
+        {
+          "name": "eqm_forcedbyuserid",
+          "width": 130
+        },
+        {
+          "name": "eqm_forcedreason",
+          "width": 200
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_endtime",
+          "descending": true
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_state",
+            "operator": "eq",
+            "value": "3"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "今月のログ",
+      "table": "eqm_operationlog",
+      "description": "今月ぶんの稼働ログ",
+      "columns": [
+        {
+          "name": "eqm_equipmentid",
+          "width": 160
+        },
+        {
+          "name": "eqm_userid",
+          "width": 120
+        },
+        {
+          "name": "eqm_starttime",
+          "width": 150
+        },
+        {
+          "name": "eqm_durationminutes",
+          "width": 100
+        },
+        {
+          "name": "eqm_state",
+          "width": 100
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_starttime",
+          "descending": true
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_starttime",
+            "operator": "this-month"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "設備別の稼働ログ",
+      "table": "eqm_operationlog",
+      "description": "設備フォームのサブグリッド用",
+      "columns": [
+        {
+          "name": "eqm_starttime",
+          "width": 150
+        },
+        {
+          "name": "eqm_endtime",
+          "width": 150
+        },
+        {
+          "name": "eqm_userid",
+          "width": 120
+        },
+        {
+          "name": "eqm_durationminutes",
+          "width": 100
+        },
+        {
+          "name": "eqm_state",
+          "width": 100
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_starttime",
+          "descending": true
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "アクティブな貸出",
+      "table": "eqm_loan",
+      "description": "すべての貸出",
+      "columns": [
+        {
+          "name": "eqm_equipmentid",
+          "width": 160
+        },
+        {
+          "name": "eqm_loantype",
+          "width": 80
+        },
+        {
+          "name": "eqm_borrowerid",
+          "width": 160
+        },
+        {
+          "name": "eqm_departmentid",
+          "width": 120
+        },
+        {
+          "name": "eqm_carrieruserid",
+          "width": 120
+        },
+        {
+          "name": "eqm_loandate",
+          "width": 110
+        },
+        {
+          "name": "eqm_duedate",
+          "width": 110
+        },
+        {
+          "name": "eqm_state",
+          "width": 90
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_loandate",
+          "descending": true
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "貸出中",
+      "table": "eqm_loan",
+      "description": "返却予定日が近い順",
+      "columns": [
+        {
+          "name": "eqm_equipmentid",
+          "width": 160
+        },
+        {
+          "name": "eqm_borrowerid",
+          "width": 160
+        },
+        {
+          "name": "eqm_departmentid",
+          "width": 120
+        },
+        {
+          "name": "eqm_carrieruserid",
+          "width": 120
+        },
+        {
+          "name": "eqm_duedate",
+          "width": 110
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_duedate",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_state",
+            "operator": "eq",
+            "value": "1"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "延滞",
+      "table": "eqm_loan",
+      "description": "返却予定日が昨日以前で未返却（フェーズ5-1）",
+      "columns": [
+        {
+          "name": "eqm_equipmentid",
+          "width": 160
+        },
+        {
+          "name": "eqm_borrowerid",
+          "width": 160
+        },
+        {
+          "name": "eqm_carrieruserid",
+          "width": 120
+        },
+        {
+          "name": "eqm_duedate",
+          "width": 110
+        },
+        {
+          "name": "eqm_overduenotified",
+          "width": 110
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_duedate",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_state",
+            "operator": "ne",
+            "value": "2"
+          },
+          {
+            "attribute": "eqm_duedate",
+            "operator": "olderthan-x-days",
+            "value": "1"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "今週返却予定",
+      "table": "eqm_loan",
+      "description": "今週が返却期限の貸出",
+      "columns": [
+        {
+          "name": "eqm_equipmentid",
+          "width": 160
+        },
+        {
+          "name": "eqm_borrowerid",
+          "width": 160
+        },
+        {
+          "name": "eqm_carrieruserid",
+          "width": 120
+        },
+        {
+          "name": "eqm_duedate",
+          "width": 110
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_duedate",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_state",
+            "operator": "ne",
+            "value": "2"
+          },
+          {
+            "attribute": "eqm_duedate",
+            "operator": "this-week"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "返却済（今月）",
+      "table": "eqm_loan",
+      "description": "今月返ってきた貸出",
+      "columns": [
+        {
+          "name": "eqm_equipmentid",
+          "width": 160
+        },
+        {
+          "name": "eqm_borrowerid",
+          "width": 160
+        },
+        {
+          "name": "eqm_carrieruserid",
+          "width": 120
+        },
+        {
+          "name": "eqm_loandate",
+          "width": 110
+        },
+        {
+          "name": "eqm_returndate",
+          "width": 110
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_returndate",
+          "descending": true
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_state",
+            "operator": "eq",
+            "value": "2"
+          },
+          {
+            "attribute": "eqm_returndate",
+            "operator": "this-month"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "設備別の貸出",
+      "table": "eqm_loan",
+      "description": "設備フォームのサブグリッド用",
+      "columns": [
+        {
+          "name": "eqm_loandate",
+          "width": 110
+        },
+        {
+          "name": "eqm_duedate",
+          "width": 110
+        },
+        {
+          "name": "eqm_returndate",
+          "width": 110
+        },
+        {
+          "name": "eqm_borrowerid",
+          "width": 160
+        },
+        {
+          "name": "eqm_carrieruserid",
+          "width": 120
+        },
+        {
+          "name": "eqm_state",
+          "width": 90
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_loandate",
+          "descending": true
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "有効な使用者",
+      "table": "eqm_user",
+      "description": "アプリを使える人の一覧",
+      "columns": [
+        {
+          "name": "eqm_employeenumber",
+          "width": 100
+        },
+        {
+          "name": "eqm_name",
+          "width": 140
+        },
+        {
+          "name": "eqm_kana",
+          "width": 140
+        },
+        {
+          "name": "eqm_upn",
+          "width": 220
+        },
+        {
+          "name": "eqm_departmentid",
+          "width": 120
+        },
+        {
+          "name": "eqm_role",
+          "width": 90
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_employeenumber",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_isactive",
+            "operator": "eq",
+            "value": "1"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "UPN 未設定の使用者",
+      "table": "eqm_user",
+      "description": "アプリに入れない人の一覧。ここが空でないと問い合わせが来る",
+      "columns": [
+        {
+          "name": "eqm_employeenumber",
+          "width": 100
+        },
+        {
+          "name": "eqm_name",
+          "width": 140
+        },
+        {
+          "name": "eqm_departmentid",
+          "width": 120
+        },
+        {
+          "name": "eqm_isactive",
+          "width": 80
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_employeenumber",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_upn",
+            "operator": "null"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "有効な設備種別",
+      "table": "eqm_equipmenttype",
+      "description": "",
+      "columns": [
+        {
+          "name": "eqm_typecode",
+          "width": 100
+        },
+        {
+          "name": "eqm_name",
+          "width": 180
+        },
+        {
+          "name": "eqm_maintenancecycledays",
+          "width": 140
+        },
+        {
+          "name": "eqm_dailyavailableminutes",
+          "width": 140
+        },
+        {
+          "name": "eqm_sortorder",
+          "width": 80
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_sortorder",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_isactive",
+            "operator": "eq",
+            "value": "1"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "有効な場所",
+      "table": "eqm_location",
+      "description": "短縮番号の番号帯もここで確認できる",
+      "columns": [
+        {
+          "name": "eqm_locationcode",
+          "width": 100
+        },
+        {
+          "name": "eqm_name",
+          "width": 180
+        },
+        {
+          "name": "eqm_building",
+          "width": 100
+        },
+        {
+          "name": "eqm_floor",
+          "width": 80
+        },
+        {
+          "name": "eqm_numberbandfrom",
+          "width": 100
+        },
+        {
+          "name": "eqm_numberbandto",
+          "width": 100
+        },
+        {
+          "name": "eqm_sortorder",
+          "width": 80
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_sortorder",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_isactive",
+            "operator": "eq",
+            "value": "1"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "有効な部署",
+      "table": "eqm_department",
+      "description": "",
+      "columns": [
+        {
+          "name": "eqm_departmentcode",
+          "width": 100
+        },
+        {
+          "name": "eqm_name",
+          "width": 180
+        },
+        {
+          "name": "eqm_parentdepartmentid",
+          "width": 140
+        },
+        {
+          "name": "eqm_sortorder",
+          "width": 80
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_sortorder",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_isactive",
+            "operator": "eq",
+            "value": "1"
+          }
+        ],
+        "filters": []
+      }
+    },
+    {
+      "name": "有効な貸出先",
+      "table": "eqm_borrower",
+      "description": "",
+      "columns": [
+        {
+          "name": "eqm_borrowercode",
+          "width": 100
+        },
+        {
+          "name": "eqm_name",
+          "width": 200
+        },
+        {
+          "name": "eqm_borrowertype",
+          "width": 100
+        },
+        {
+          "name": "eqm_contactperson",
+          "width": 120
+        },
+        {
+          "name": "eqm_contact",
+          "width": 140
+        }
+      ],
+      "order": [
+        {
+          "attribute": "eqm_name",
+          "descending": false
+        }
+      ],
+      "filter": {
+        "type": "and",
+        "conditions": [
+          {
+            "attribute": "statecode",
+            "operator": "eq",
+            "value": "0"
+          },
+          {
+            "attribute": "eqm_isactive",
+            "operator": "eq",
+            "value": "1"
+          }
+        ],
+        "filters": []
+      }
+    }
+  ],
+  "sitemap": {
+    "uniqueName": "eqm_admin",
+    "areas": [
+      {
+        "id": "eqm_area_main",
+        "title": "設備管理",
+        "groups": [
+          {
+            "id": "eqm_group_daily",
+            "title": "日常",
+            "subAreas": [
+              {
+                "id": "eqm_sub_equipment",
+                "table": "eqm_equipment",
+                "title": "設備"
+              },
+              {
+                "id": "eqm_sub_log",
+                "table": "eqm_operationlog",
+                "title": "稼働ログ"
+              },
+              {
+                "id": "eqm_sub_loan",
+                "table": "eqm_loan",
+                "title": "貸出"
+              }
+            ]
+          },
+          {
+            "id": "eqm_group_master",
+            "title": "マスタ",
+            "subAreas": [
+              {
+                "id": "eqm_sub_user",
+                "table": "eqm_user",
+                "title": "使用者"
+              },
+              {
+                "id": "eqm_sub_type",
+                "table": "eqm_equipmenttype",
+                "title": "設備種別"
+              },
+              {
+                "id": "eqm_sub_location",
+                "table": "eqm_location",
+                "title": "場所"
+              },
+              {
+                "id": "eqm_sub_dept",
+                "table": "eqm_department",
+                "title": "部署"
+              },
+              {
+                "id": "eqm_sub_borrower",
+                "table": "eqm_borrower",
+                "title": "貸出先"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
