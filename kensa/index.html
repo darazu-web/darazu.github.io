@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>製品検査アプリ</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="view">
+  <header class="app-header">
+    <div class="app-header-inner">
+      <div class="app-title">
+        <h1 id="appTitle">製品検査アプリ</h1>
+        <span class="sub" id="appSubtitle">検査項目・検査方法・使用設備 確認システム</span>
+      </div>
+      <span class="spacer"></span>
+      <span class="mode-badge mode-view" id="modeBadge">閲覧モード</span>
+      <button class="btn admin-only btn-sm" id="btnAddProduct">＋ 製品を追加</button>
+      <button class="btn admin-only btn-sm" id="btnExport">データ書き出し</button>
+      <button class="btn admin-only btn-sm" id="btnImport">データ取り込み</button>
+      <button class="btn admin-only btn-sm" id="btnChangePw">パスワード変更</button>
+      <button class="btn btn-primary btn-sm" id="btnAdmin">管理者ログイン</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="banner admin-notice">
+      管理者モードです。編集内容はこのブラウザに自動保存されます。全員へ反映するには
+      <strong>「データ書き出し」</strong>で <code>data.json</code> を保存し、リポジトリにコミットしてください。
+    </div>
+
+    <div class="toolbar">
+      <div class="search">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="検査項目・設備・ハーネス・ソフト名などで検索">
+      </div>
+      <select class="select" id="productFilter">
+        <option value="">すべての製品</option>
+      </select>
+    </div>
+
+    <div id="list"></div>
+  </main>
+
+  <!-- Login modal -->
+  <div class="modal-backdrop" id="loginModal">
+    <div class="modal">
+      <div class="modal-head"><h3>管理者ログイン</h3></div>
+      <div class="modal-body">
+        <label class="form-label" for="pwInput">パスワード</label>
+        <input class="form-input" type="password" id="pwInput" autocomplete="current-password" placeholder="管理者パスワード">
+        <div class="form-hint">管理者のみ。閲覧だけなら不要です。</div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" data-close>キャンセル</button>
+        <button class="btn btn-primary" id="pwSubmit">ログイン</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product editor modal -->
+  <div class="modal-backdrop" id="productModal">
+    <div class="modal">
+      <div class="modal-head"><h3 id="productModalTitle">製品を追加</h3></div>
+      <div class="modal-body">
+        <label class="form-label" for="pName">製品名 <span style="color:var(--ng)">*</span></label>
+        <input class="form-input" id="pName" placeholder="例：サンプル製品 A">
+        <label class="form-label" for="pCode">品番 / 型式</label>
+        <input class="form-input" id="pCode" placeholder="例：PRD-A-001">
+        <label class="form-label" for="pNote">備考</label>
+        <input class="form-input" id="pNote" placeholder="製品に関するメモ（任意）">
+      </div>
+      <div class="modal-foot">
+        <button class="btn" data-close>キャンセル</button>
+        <button class="btn btn-primary" id="productSave">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Item editor modal -->
+  <div class="modal-backdrop" id="itemModal">
+    <div class="modal">
+      <div class="modal-head"><h3 id="itemModalTitle">検査項目を追加</h3></div>
+      <div class="modal-body">
+        <label class="form-label" for="iName">検査項目 <span style="color:var(--ng)">*</span></label>
+        <input class="form-input" id="iName" placeholder="例：電気特性検査（導通・絶縁）">
+
+        <label class="form-label" for="iMethod">検査方法</label>
+        <textarea class="form-textarea" id="iMethod" placeholder="検査の手順・判定基準などを記入"></textarea>
+
+        <label class="form-label">使用する設備</label>
+        <div class="sub-group">
+          <label class="form-label" for="eTesterNo">テスター品番</label>
+          <input class="form-input" id="eTesterNo" placeholder="例：TST-12345">
+          <label class="form-label" for="eTesterName">テスター名</label>
+          <input class="form-input" id="eTesterName" placeholder="例：導通絶縁検査機 Model-X">
+          <label class="form-label" for="ePeripherals">周辺設備</label>
+          <input class="form-input" id="ePeripherals" placeholder="例：専用治具、電源ユニットなど">
+          <label class="form-label" for="eHarness">ハーネス</label>
+          <input class="form-input" id="eHarness" placeholder="例：HN-A-001">
+          <label class="form-label" for="eSoftware">ソフトウェア</label>
+          <input class="form-input" id="eSoftware" placeholder="例：InspectWare v2.3（レシピ名）">
+        </div>
+
+        <label class="form-label" for="iNotes">特記事項</label>
+        <textarea class="form-textarea" id="iNotes" placeholder="注意点・キャリブレーション要件など"></textarea>
+
+        <label class="form-label" for="iOther">その他</label>
+        <textarea class="form-textarea" id="iOther" placeholder="その他の情報"></textarea>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" data-close>キャンセル</button>
+        <button class="btn btn-primary" id="itemSave">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Change password modal -->
+  <div class="modal-backdrop" id="pwModal">
+    <div class="modal">
+      <div class="modal-head"><h3>管理者パスワード変更</h3></div>
+      <div class="modal-body">
+        <label class="form-label" for="newPw">新しいパスワード</label>
+        <input class="form-input" type="password" id="newPw" autocomplete="new-password">
+        <label class="form-label" for="newPw2">新しいパスワード（確認）</label>
+        <input class="form-input" type="password" id="newPw2" autocomplete="new-password">
+        <div class="form-hint">
+          変更後は<strong>「データ書き出し」</strong>で <code>data.json</code> を保存し、
+          リポジトリにコミットすると全員に反映されます。
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" data-close>キャンセル</button>
+        <button class="btn btn-primary" id="pwChangeSave">変更</button>
+      </div>
+    </div>
+  </div>
+
+  <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
