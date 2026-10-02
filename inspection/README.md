@@ -5,8 +5,8 @@
 
 | 画面 | URL | 対象 |
 | --- | --- | --- |
-| 閲覧画面 | `https://darazu-web.github.io/inspection/` | 検査作業者 |
-| 管理画面 | `https://darazu-web.github.io/inspection/admin.html` | 管理者のみ |
+| 閲覧画面 | `https://darazu-web.github.io/darazu.github.io/inspection/` | 検査作業者 |
+| 管理画面 | `https://darazu-web.github.io/darazu.github.io/inspection/admin.html` | 管理者のみ |
 
 ## 閲覧画面でできること
 
