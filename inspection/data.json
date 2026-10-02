@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "updatedAt": "2026-10-02T00:00:00.000Z",
+  "updatedBy": "",
+  "products": [
+    {
+      "id": "p-sample-a",
+      "code": "ECU-1000",
+      "name": "サンプル制御ユニット（記入例）",
+      "description": "記入例です。管理画面から実際の製品情報に置き換えてください。",
+      "items": [
+        {
+          "id": "i-sample-1",
+          "no": "1",
+          "name": "外観検査",
+          "category": "外観",
+          "method": "検査台の照明（1000lx以上）を点灯する\n製品を限度見本と並べて置く\nケースの傷・打痕・汚れを目視で確認する\nラベルの印字（品番・ロット）が読めることを確認する",
+          "criteria": "限度見本を超える傷・打痕がないこと\nラベル印字に欠け・にじみがないこと",
+          "equipment": {
+            "testerNo": "",
+            "testerName": "",
+            "peripherals": [
+              { "code": "LT-200", "name": "検査用LED照明", "note": "照度を始業時に確認" },
+              { "code": "GS-01", "name": "限度見本セット", "note": "保管棚 B-3" }
+            ],
+            "harnesses": [],
+            "software": []
+          },
+          "notes": "限度見本は有効期限ラベルを確認してから使用すること。",
+          "other": ""
+        },
+        {
+          "id": "i-sample-2",
+          "no": "2",
+          "name": "電源電流測定",
+          "category": "電気特性",
+          "method": "テスターの電源がOFFであることを確認する\nハーネス H-ECU-01 を製品のCN1に接続する\n検査ソフトを起動し「電流測定」を選択する\nSTARTボタンを押し、結果がPASSであることを確認する\n測定結果を記録してからハーネスを外す",
+          "criteria": "待機電流：50mA 以下\n動作電流：200〜350mA",
+          "equipment": {
+            "testerNo": "TS-5000-A",
+            "testerName": "汎用ファンクションテスター",
+            "peripherals": [
+              { "code": "PS-3020", "name": "直流安定化電源", "note": "12.0V 設定" },
+              { "code": "DM-100", "name": "デジタルマルチメーター", "note": "校正期限を確認" }
+            ],
+            "harnesses": [
+              { "code": "H-ECU-01", "name": "電源検査用ハーネス", "note": "挿抜回数 5000回で交換" }
+            ],
+            "software": [
+              { "code": "Ver.2.3.1", "name": "ECU検査プログラム", "note": "起動時にバージョンを確認" }
+            ]
+          },
+          "notes": "電源ONのままハーネスを抜き差ししないこと（製品破損の恐れ）。\n静電気対策のためリストストラップを必ず着用する。",
+          "other": "不合格時は再測定せず、不良品置き場へ移して班長へ報告。"
+        },
+        {
+          "id": "i-sample-3",
+          "no": "3",
+          "name": "通信機能検査",
+          "category": "機能",
+          "method": "ハーネス H-ECU-02 をCN2に接続する\n検査ソフトで「CAN通信」を選択する\nSTARTボタンを押し、自動判定の結果を確認する",
+          "criteria": "全IDの送受信が正常に完了すること（自動判定 PASS）",
+          "equipment": {
+            "testerNo": "TS-5000-A",
+            "testerName": "汎用ファンクションテスター",
+            "peripherals": [
+              { "code": "CAN-IF2", "name": "CANインターフェース", "note": "" }
+            ],
+            "harnesses": [
+              { "code": "H-ECU-02", "name": "通信検査用ハーネス", "note": "" }
+            ],
+            "software": [
+              { "code": "Ver.2.3.1", "name": "ECU検査プログラム", "note": "" },
+              { "code": "Ver.1.0.4", "name": "CANドライバ", "note": "" }
+            ]
+          },
+          "notes": "",
+          "other": ""
+        }
+      ]
+    }
+  ]
+}

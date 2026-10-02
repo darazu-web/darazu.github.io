@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>検査情報 管理</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <!-- ログイン -->
+  <section id="loginView">
+    <div class="panel login-box">
+      <h2>管理者ログイン</h2>
+      <p class="help">
+        内容の変更は、このリポジトリへの書き込み権限を持つ GitHub アカウントのみ保存できます。
+        管理者の GitHub アクセストークン（Fine-grained token、対象リポジトリの <b>Contents: Read and write</b>）を入力してください。
+        トークンはこのタブを閉じると破棄されます。
+      </p>
+      <label class="field"><span>GitHub アクセストークン</span>
+        <input id="tokenInput" type="password" autocomplete="off" placeholder="github_pat_...">
+      </label>
+      <details>
+        <summary class="help">保存先の設定</summary>
+        <div class="field-row" style="margin-top:8px">
+          <label class="field"><span>リポジトリ (owner/name)</span><input id="repoInput" type="text"></label>
+          <label class="field"><span>ブランチ</span><input id="branchInput" type="text"></label>
+        </div>
+        <label class="field"><span>データファイルのパス</span><input id="pathInput" type="text"></label>
+      </details>
+      <div id="loginMsg"></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px">
+        <button id="loginBtn" class="btn primary" type="button">ログイン</button>
+        <button id="offlineBtn" class="btn" type="button">トークンなしで編集（JSONファイル出力のみ）</button>
+      </div>
+      <p class="help" style="margin-top:16px"><a href="index.html">← 閲覧画面へ戻る</a></p>
+    </div>
+  </section>
+
+  <!-- 編集 -->
+  <section id="editView" hidden>
+    <header class="app-header admin-bar">
+      <h1 class="app-title">検査情報 管理<small id="whoami"></small></h1>
+      <div class="header-tools">
+        <select id="productSelect" aria-label="製品を選択"></select>
+        <button id="addProductBtn" class="btn small" type="button">＋ 製品追加</button>
+        <span class="spacer"></span>
+        <span id="dirtyFlag" class="dirty-flag"></span>
+        <button id="importBtn" class="btn small" type="button">JSON読込</button>
+        <button id="exportBtn" class="btn small" type="button">JSON出力</button>
+        <button id="saveBtn" class="btn small primary" type="button">保存（公開）</button>
+        <button id="logoutBtn" class="btn small" type="button">ログアウト</button>
+        <input id="importFile" type="file" accept="application/json,.json" hidden>
+      </div>
+    </header>
+    <div id="globalMsg" style="max-width:1400px;margin:0 auto;padding:0 16px"></div>
+    <main class="layout">
+      <aside class="panel sidebar">
+        <ul id="editList" class="item-list"></ul>
+        <div style="padding:8px 12px 12px">
+          <button id="addItemBtn" class="btn small" type="button" style="width:100%;justify-content:center">＋ 検査項目を追加</button>
+        </div>
+      </aside>
+      <section class="panel">
+        <div id="editor" class="editor"></div>
+      </section>
+    </main>
+  </section>
+
+  <script src="common.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>

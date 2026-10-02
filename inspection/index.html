@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>検査情報ビューア</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="app-header">
+    <h1 class="app-title">検査情報<small>閲覧用</small></h1>
+    <div class="header-tools">
+      <select id="productSelect" aria-label="製品を選択"></select>
+      <input id="search" type="search" placeholder="検索（項目名・品番・設備名など）" aria-label="検索">
+      <span class="spacer"></span>
+      <button id="printBtn" class="btn small" type="button">印刷</button>
+    </div>
+  </header>
+
+  <main id="layout" class="layout">
+    <aside class="panel sidebar">
+      <div class="tabs" role="tablist">
+        <button type="button" data-view="items" class="active">検査項目</button>
+        <button type="button" data-view="equipment">設備まとめ</button>
+      </div>
+      <div id="listHead" class="list-head"></div>
+      <ul id="itemList" class="item-list"></ul>
+    </aside>
+    <section class="panel detail-wrap">
+      <div class="no-print only-mobile" style="padding:10px 16px 0">
+        <button id="backBtn" class="btn small" type="button">← 一覧へ戻る</button>
+      </div>
+      <div id="detail" class="detail">
+        <div class="placeholder">読み込み中…</div>
+      </div>
+    </section>
+  </main>
+
+  <p class="footer-note">
+    <span id="updated"></span>
+    ・内容の変更は管理者のみ（<a href="admin.html">管理者用</a>）
+  </p>
+
+  <script src="common.js"></script>
+  <script src="viewer.js"></script>
+</body>
+</html>
