@@ -1,90 +1,144 @@
 <!DOCTYPE html>
-<html>
-<頭>
-  <メタ文字セット="utf-8">
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>プロゲート</title>
-  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" Integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="匿名">
-  <link rel="stylesheet" type="text/css" href="stylesheet.css">
+  <title>製品検査アプリ</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
-<本体>
-  <ヘッダー>
-    <div class="コンテナ">
-      <div class="header-left">
-        <img class="logo" src="https://prog-8.com/images/html/advanced/main_logo.png">
+<body class="view">
+  <header class="app-header">
+    <div class="app-header-inner">
+      <div class="app-title">
+        <h1 id="appTitle">製品検査アプリ</h1>
+        <span class="sub" id="appSubtitle">検査項目・検査方法・使用設備 確認システム</span>
       </div>
-      <span class="fa fa-bars menu-icon"></span>
-      <div class="header-right">
-        <a href="#">レッスン</a>
-        <a href="#">新規登録</a>
-        <a href="#" class="login">ログイン</a>
-      </div>
+      <span class="spacer"></span>
+      <span class="mode-badge mode-view" id="modeBadge">閲覧モード</span>
+      <button class="btn admin-only btn-sm" id="btnAddProduct">＋ 製品を追加</button>
+      <button class="btn admin-only btn-sm" id="btnExport">データ書き出し</button>
+      <button class="btn admin-only btn-sm" id="btnImport">データ取り込み</button>
+      <button class="btn admin-only btn-sm" id="btnChangePw">パスワード変更</button>
+      <button class="btn btn-primary btn-sm" id="btnAdmin">管理者ログイン</button>
     </div>
   </header>
-  <div class="トップラッパー">
-    <div class="コンテナ">
-      <h1>コーディングを学びましょう。<br>クリエイティブであることを学びましょう。</h1>
-      <p>Progateはオンラインプログラミング学習サービスです。<br>初心者にもやさしいスライドとレッスンで、ウェブサービスを作りながらプログラミングを学びましょう。</p>
-      <div class="btn-wrapper">
-        <a href="#" class="btn signup">新規登録はこちら</a>
-        <p>または</p>
-        <a href="#" class="btn facebook"><span class="fa fa-facebook"></span>Facebookで登録</a>
-        <a href="#" class="btn twitter"><span class="fa fa-twitter"></span>Twitterで登録</a>
+
+  <main class="container">
+    <div class="banner admin-notice">
+      管理者モードです。編集内容はこのブラウザに自動保存されます。全員へ反映するには
+      <strong>「データ書き出し」</strong>で <code>data.json</code> を保存し、リポジトリにコミットしてください。
+    </div>
+
+    <div class="toolbar">
+      <div class="search">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="検査項目・設備・ハーネス・ソフト名などで検索">
+      </div>
+      <select class="select" id="productFilter">
+        <option value="">すべての製品</option>
+      </select>
+    </div>
+
+    <div id="list"></div>
+  </main>
+
+  <!-- Login modal -->
+  <div class="modal-backdrop" id="loginModal">
+    <div class="modal">
+      <div class="modal-head"><h3>管理者ログイン</h3></div>
+      <div class="modal-body">
+        <label class="form-label" for="pwInput">パスワード</label>
+        <input class="form-input" type="password" id="pwInput" autocomplete="current-password" placeholder="管理者パスワード">
+        <div class="form-hint">管理者のみ。閲覧だけなら不要です。</div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" data-close>キャンセル</button>
+        <button class="btn btn-primary" id="pwSubmit">ログイン</button>
       </div>
     </div>
   </div>
-  <div class="lesson-wrapper">
-    <div class="コンテナ">
-      <div class="heading">
-        <h2>どこから始めればよいかを学びましょう!</h2>
+
+  <!-- Product editor modal -->
+  <div class="modal-backdrop" id="productModal">
+    <div class="modal">
+      <div class="modal-head"><h3 id="productModalTitle">製品を追加</h3></div>
+      <div class="modal-body">
+        <label class="form-label" for="pName">製品名 <span style="color:var(--ng)">*</span></label>
+        <input class="form-input" id="pName" placeholder="例：サンプル製品 A">
+        <label class="form-label" for="pCode">品番 / 型式</label>
+        <input class="form-input" id="pCode" placeholder="例：PRD-A-001">
+        <label class="form-label" for="pNote">備考</label>
+        <input class="form-input" id="pNote" placeholder="製品に関するメモ（任意）">
       </div>
-      <div class="レッスン">
-        <div class="レッスン">
-          <div class="レッスンアイコン">
-            <img src="https://prog-8.com/images/html/advanced/html.png">
-            <p>HTML & CSS</p>
-          </div>
-          <p class="text-contents">ウェブページの作成に使用される言語です。HTMLとCSSを組み合わせることで、シンプルなページを作ることができます。</p>
-        </div>
-        <div class="レッスン">
-          <div class="レッスンアイコン">
-            <img src="https://prog-8.com/images/html/advanced/jQuery.png">
-            <p>jQuery</p>
-          </div>
-          <p class="text-contents">素敵な動きを手軽に実装できるJavaScriptライブラリです。 アニメーション効果をつけたり、Ajax（エイジャックス）を使って外部ファイルを読み込んだりと色々なことができます。 p>
-        </div>
-        <div class="レッスン">
-          <div class="レッスンアイコン">
-            <img src="https://prog-8.com/images/html/advanced/ruby.png">
-            <p>ルビー</p>
-          </div>
-          <p class="text-contents">オープンソースの動的なプログラミング言語で、シンプルさと高い生産性を備えています。大きなWebアプリケーションから小さな日常用ツールまで、さまざまなソフトウェアを作ることができます。 </p>
-        </div>
-        <div class="レッスン">
-          <div class="レッスンアイコン">
-            <img src="https://prog-8.com/images/html/advanced/php.png">
-            <p>PHP</p>
-          </div>
-          <p class="text-contents">HTMLだけではページの内容を変えることはできません。PHPはHTMLにプログラムを参照し、それを可能にします。</p>
-        </div>
+      <div class="modal-foot">
+        <button class="btn" data-close>キャンセル</button>
+        <button class="btn btn-primary" id="productSave">保存</button>
       </div>
-      <div class="clear"></div>
     </div>
   </div>
-  <div class="メッセージラッパー">
-    <div class="コンテナ">
-      <div class="heading">
-        <h2>さぁ、あなたもProgateでプログラミングを学んでみませんか?</h2>
-        <h3>コーディングを学び、クリエイティブになることを学びましょう!</h3>
+
+  <!-- Item editor modal -->
+  <div class="modal-backdrop" id="itemModal">
+    <div class="modal">
+      <div class="modal-head"><h3 id="itemModalTitle">検査項目を追加</h3></div>
+      <div class="modal-body">
+        <label class="form-label" for="iName">検査項目 <span style="color:var(--ng)">*</span></label>
+        <input class="form-input" id="iName" placeholder="例：電気特性検査（導通・絶縁）">
+
+        <label class="form-label" for="iMethod">検査方法</label>
+        <textarea class="form-textarea" id="iMethod" placeholder="検査の手順・判定基準などを記入"></textarea>
+
+        <label class="form-label">使用する設備</label>
+        <div class="sub-group">
+          <label class="form-label" for="eTesterNo">テスター品番</label>
+          <input class="form-input" id="eTesterNo" placeholder="例：TST-12345">
+          <label class="form-label" for="eTesterName">テスター名</label>
+          <input class="form-input" id="eTesterName" placeholder="例：導通絶縁検査機 Model-X">
+          <label class="form-label" for="ePeripherals">周辺設備</label>
+          <input class="form-input" id="ePeripherals" placeholder="例：専用治具、電源ユニットなど">
+          <label class="form-label" for="eHarness">ハーネス</label>
+          <input class="form-input" id="eHarness" placeholder="例：HN-A-001">
+          <label class="form-label" for="eSoftware">ソフトウェア</label>
+          <input class="form-input" id="eSoftware" placeholder="例：InspectWare v2.3（レシピ名）">
+        </div>
+
+        <label class="form-label" for="iNotes">特記事項</label>
+        <textarea class="form-textarea" id="iNotes" placeholder="注意点・キャリブレーション要件など"></textarea>
+
+        <label class="form-label" for="iOther">その他</label>
+        <textarea class="form-textarea" id="iOther" placeholder="その他の情報"></textarea>
       </div>
-      <span class="btn message">すぐに開発する</span>
+      <div class="modal-foot">
+        <button class="btn" data-close>キャンセル</button>
+        <button class="btn btn-primary" id="itemSave">保存</button>
+      </div>
     </div>
   </div>
-  <フッター>
-    <div class="コンテナ">
-      <img src="https://prog-8.com/images/html/advanced/footer_logo.png">
-      <p>コーディングを学び、クリエイティブになることを学びましょう。</p>
+
+  <!-- Change password modal -->
+  <div class="modal-backdrop" id="pwModal">
+    <div class="modal">
+      <div class="modal-head"><h3>管理者パスワード変更</h3></div>
+      <div class="modal-body">
+        <label class="form-label" for="newPw">新しいパスワード</label>
+        <input class="form-input" type="password" id="newPw" autocomplete="new-password">
+        <label class="form-label" for="newPw2">新しいパスワード（確認）</label>
+        <input class="form-input" type="password" id="newPw2" autocomplete="new-password">
+        <div class="form-hint">
+          変更後は<strong>「データ書き出し」</strong>で <code>data.json</code> を保存し、
+          リポジトリにコミットすると全員に反映されます。
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn" data-close>キャンセル</button>
+        <button class="btn btn-primary" id="pwChangeSave">変更</button>
+      </div>
     </div>
-  </フッター>
+  </div>
+
+  <input type="file" id="importFile" accept="application/json,.json" style="display:none">
+  <div class="toast" id="toast"></div>
+
+  <script src="app.js"></script>
 </body>
 </html>
