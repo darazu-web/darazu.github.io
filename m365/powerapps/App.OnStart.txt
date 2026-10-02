@@ -1,0 +1,17 @@
+Set(varIsAdmin, DataSourceInfo(InspItems, DataSourceInfo.EditPermission));
+ClearCollect(colProducts, ForAll(Sort(InspProducts, Title, SortOrder.Ascending) As p, {ID: p.ID, Title: p.Title, ProductName: p.ProductName, Description: p.Description, Label: p.Title & "  " & p.ProductName}));
+ClearCollect(colEditEq, {Key: "", EqID: 0, EquipType: "", Code: "", EqName: "", Note: "", Seq: 0});
+Clear(colEditEq);
+ClearCollect(colEqDeleted, {EqID: 0});
+Clear(colEqDeleted);
+Set(varEdit, LookUp(InspItems, ID = -1));
+Set(varConfirmDel, false);
+Set(varConfirmDelP, false);
+Set(varAdmProduct, First(colProducts));
+ClearCollect(colAdmItems, Sort(Filter(InspItems, ProductID = varAdmProduct.ID), ItemNo, SortOrder.Ascending));
+Set(varProduct, First(colProducts));
+ClearCollect(colTmp, Sort(Filter(InspItems, ProductID = varProduct.ID), ItemNo, SortOrder.Ascending));
+ClearCollect(colItems, ForAll(Sequence(CountRows(colTmp)) As n, Patch(Index(colTmp, n.Value), {RowNo: n.Value})));
+ClearCollect(colEqAll, Filter(InspEquipment, ProductID = varProduct.ID));
+Set(varItem, First(colItems));
+Set(varView, "item")

@@ -1,0 +1,738 @@
+- conAdmin:
+    Control: GroupContainer@1.3.0
+    Variant: ManualLayout
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =RGBA(244, 246, 248, 1)
+      Height: =Parent.Height
+      Width: =Parent.Width
+      X: =0
+      Y: =0
+    Children:
+      - recAdmHeader:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(43, 52, 64, 1)
+            Height: =64
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+      - lblAdmTitle:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =64
+            Size: =18
+            Text: |-
+              ="検査情報 管理"
+            Width: =200
+            X: =16
+            Y: =0
+      - lblAdmUser:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(200, 209, 219, 1)
+            Height: =64
+            Size: =11
+            Text: |-
+              =User().FullName & " で編集中"
+            Width: =400
+            X: =220
+            Y: =0
+      - btnBack:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(213, 219, 226, 1)
+            BorderThickness: =1
+            Color: =RGBA(28, 36, 48, 1)
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =40
+            HoverColor: =RGBA(28, 36, 48, 1)
+            HoverFill: =RGBA(238, 241, 244, 1)
+            OnSelect: |-
+              =Refresh(InspProducts);
+              Refresh(InspItems);
+              Refresh(InspEquipment);
+              ClearCollect(colProducts, ForAll(Sort(InspProducts, Title, SortOrder.Ascending) As p, {ID: p.ID, Title: p.Title, ProductName: p.ProductName, Description: p.Description, Label: p.Title & "  " & p.ProductName}));
+              Set(varProduct, If(IsBlank(LookUp(colProducts, ID = varAdmProduct.ID)), First(colProducts), LookUp(colProducts, ID = varAdmProduct.ID)));
+              ClearCollect(colTmp, Sort(Filter(InspItems, ProductID = varProduct.ID), ItemNo, SortOrder.Ascending));
+              ClearCollect(colItems, ForAll(Sequence(CountRows(colTmp)) As n, Patch(Index(colTmp, n.Value), {RowNo: n.Value})));
+              ClearCollect(colEqAll, Filter(InspEquipment, ProductID = varProduct.ID));
+              Set(varItem, First(colItems));
+              Set(varView, "item");
+              Navigate(scrBrowse, ScreenTransition.None)
+            Size: =13
+            Text: |-
+              ="閲覧画面へ戻る"
+            Width: =180
+            X: =Parent.Width - 196
+            Y: =12
+      - ddAdmProduct:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            Default: =varAdmProduct.Label
+            Height: =40
+            Items: =ForAll(colProducts, ThisRecord.Label)
+            OnChange: |-
+              =Set(varAdmProduct, LookUp(colProducts, Label = Self.Selected.Value));
+              ClearCollect(colAdmItems, Sort(Filter(InspItems, ProductID = varAdmProduct.ID), ItemNo, SortOrder.Ascending));
+              Set(varEdit, LookUp(InspItems, ID = -1));
+              Set(varConfirmDelP, false)
+            Size: =13
+            Width: =260
+            X: =12
+            Y: =76
+      - btnAddProduct:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(213, 219, 226, 1)
+            BorderThickness: =1
+            Color: =RGBA(28, 36, 48, 1)
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =40
+            HoverColor: =RGBA(28, 36, 48, 1)
+            HoverFill: =RGBA(238, 241, 244, 1)
+            OnSelect: |-
+              =With({pid: Patch(InspProducts, Defaults(InspProducts), {Title: "NEW-" & Text(Now(), "yyyymmddhhmmss"), ProductName: "新しい製品"}).ID},
+                  ClearCollect(colProducts, ForAll(Sort(InspProducts, Title, SortOrder.Ascending) As p, {ID: p.ID, Title: p.Title, ProductName: p.ProductName, Description: p.Description, Label: p.Title & "  " & p.ProductName}));
+              Set(varAdmProduct, LookUp(colProducts, ID = pid));
+              ClearCollect(colAdmItems, Sort(Filter(InspItems, ProductID = varAdmProduct.ID), ItemNo, SortOrder.Ascending))
+              );
+              Set(varEdit, LookUp(InspItems, ID = -1));
+              Set(varConfirmDelP, false);
+              Notify("製品を追加しました。品番と製品名を入力して保存してください", NotificationType.Information)
+            Size: =13
+            Text: |-
+              ="＋ 製品"
+            Width: =92
+            X: =280
+            Y: =76
+      - lblPCode:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(93, 107, 122, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =22
+            Size: =11
+            Text: |-
+              ="製品品番"
+            Width: =360
+            X: =12
+            Y: =122
+      - txtPCode:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            Default: =varAdmProduct.Title
+            DisplayMode: =If(IsBlank(varAdmProduct), DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =38
+            Size: =13
+            Width: =360
+            X: =12
+            Y: =144
+      - lblPName:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(93, 107, 122, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =22
+            Size: =11
+            Text: |-
+              ="製品名"
+            Width: =360
+            X: =12
+            Y: =186
+      - txtPName:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            Default: =varAdmProduct.ProductName
+            DisplayMode: =If(IsBlank(varAdmProduct), DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =38
+            Size: =13
+            Width: =360
+            X: =12
+            Y: =208
+      - lblPDesc:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(93, 107, 122, 1)
+            FontWeight: =FontWeight.Semibold
+            Height: =22
+            Size: =11
+            Text: |-
+              ="説明・備考"
+            Width: =360
+            X: =12
+            Y: =250
+      - txtPDesc:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            Default: =varAdmProduct.Description
+            DisplayMode: =If(IsBlank(varAdmProduct), DisplayMode.Disabled, DisplayMode.Edit)
+            Height: =60
+            Mode: =TextMode.MultiLine
+            Size: =13
+            Width: =360
+            X: =12
+            Y: =272
+      - btnSaveProduct:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(31, 111, 235, 1)
+            BorderThickness: =1
+            Color: =RGBA(255, 255, 255, 1)
+            DisplayMode: =If(IsBlank(varAdmProduct), DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =RGBA(31, 111, 235, 1)
+            Height: =38
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(25, 95, 205, 1)
+            OnSelect: |-
+              =If(IsBlank(Trim(txtPCode.Text)),
+                  Notify("製品品番を入力してください", NotificationType.Error),
+                  With({pid: varAdmProduct.ID},
+                      Patch(InspProducts, LookUp(InspProducts, ID = pid), {Title: Trim(txtPCode.Text), ProductName: txtPName.Text, Description: txtPDesc.Text});
+                      ClearCollect(colProducts, ForAll(Sort(InspProducts, Title, SortOrder.Ascending) As p, {ID: p.ID, Title: p.Title, ProductName: p.ProductName, Description: p.Description, Label: p.Title & "  " & p.ProductName}));
+              Set(varAdmProduct, LookUp(colProducts, ID = pid));
+              ClearCollect(colAdmItems, Sort(Filter(InspItems, ProductID = varAdmProduct.ID), ItemNo, SortOrder.Ascending));
+                      Notify("製品情報を保存しました", NotificationType.Success)
+                  )
+              )
+            Size: =13
+            Text: |-
+              ="製品情報を保存"
+            Width: =176
+            X: =12
+            Y: =340
+      - btnDelProduct:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(198, 40, 40, 1)
+            BorderThickness: =1
+            Color: =If(varConfirmDelP, RGBA(255, 255, 255, 1), RGBA(198, 40, 40, 1))
+            DisplayMode: =If(IsBlank(varAdmProduct), DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =If(varConfirmDelP, RGBA(198, 40, 40, 1), RGBA(255, 255, 255, 1))
+            Height: =38
+            HoverColor: =If(varConfirmDelP, RGBA(255, 255, 255, 1), RGBA(198, 40, 40, 1))
+            HoverFill: =If(varConfirmDelP, RGBA(198, 40, 40, 1), RGBA(253, 231, 231, 1))
+            OnSelect: |-
+              =If(!varConfirmDelP,
+                  Set(varConfirmDelP, true),
+                  With({pid: varAdmProduct.ID},
+                      RemoveIf(InspEquipment, ProductID = pid);
+                      RemoveIf(InspItems, ProductID = pid);
+                      RemoveIf(InspProducts, ID = pid)
+                  );
+                  ClearCollect(colProducts, ForAll(Sort(InspProducts, Title, SortOrder.Ascending) As p, {ID: p.ID, Title: p.Title, ProductName: p.ProductName, Description: p.Description, Label: p.Title & "  " & p.ProductName}));
+                  Set(varAdmProduct, First(colProducts));
+                  ClearCollect(colAdmItems, Sort(Filter(InspItems, ProductID = varAdmProduct.ID), ItemNo, SortOrder.Ascending));
+                  Set(varEdit, LookUp(InspItems, ID = -1));
+                  Set(varConfirmDelP, false);
+                  Notify("製品を削除しました", NotificationType.Success)
+              )
+            Size: =13
+            Text: |-
+              =If(varConfirmDelP, "本当に削除する", "製品を削除")
+            Width: =176
+            X: =196
+            Y: =340
+      - lblAdmItems:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(28, 36, 48, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =40
+            Size: =13
+            Text: |-
+              ="検査項目（" & CountRows(colAdmItems) & "）"
+            Width: =220
+            X: =12
+            Y: =392
+      - btnAddItem:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(213, 219, 226, 1)
+            BorderThickness: =1
+            Color: =RGBA(28, 36, 48, 1)
+            DisplayMode: =If(IsBlank(varAdmProduct), DisplayMode.Disabled, DisplayMode.Edit)
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =40
+            HoverColor: =RGBA(28, 36, 48, 1)
+            HoverFill: =RGBA(238, 241, 244, 1)
+            OnSelect: |-
+              =Set(varEdit, Patch(InspItems, Defaults(InspItems), {Title: "新しい検査項目", ProductID: varAdmProduct.ID, ItemNo: Max(colAdmItems, ItemNo) + 1}));
+              ClearCollect(colAdmItems, Sort(Filter(InspItems, ProductID = varAdmProduct.ID), ItemNo, SortOrder.Ascending));
+              ClearCollect(colEditEq, ForAll(Sort(Filter(InspEquipment, ItemID = varEdit.ID), SeqNo, SortOrder.Ascending) As e, {Key: Text(GUID()), EqID: e.ID, EquipType: e.EquipType, Code: e.Code, EqName: e.Title, Note: e.Note, Seq: e.SeqNo}));
+              Clear(colEqDeleted);
+              Set(varConfirmDel, false)
+            Size: =13
+            Text: |-
+              ="＋ 検査項目"
+            Width: =132
+            X: =240
+            Y: =392
+      - galAdmItems:
+          Control: Gallery@2.15.0
+          Variant: Vertical
+          Properties:
+            BorderColor: =RGBA(213, 219, 226, 1)
+            BorderThickness: =1
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =Parent.Height - 450
+            Items: =colAdmItems
+            OnSelect: |-
+              =Set(varEdit, ThisItem);
+              ClearCollect(colEditEq, ForAll(Sort(Filter(InspEquipment, ItemID = varEdit.ID), SeqNo, SortOrder.Ascending) As e, {Key: Text(GUID()), EqID: e.ID, EquipType: e.EquipType, Code: e.Code, EqName: e.Title, Note: e.Note, Seq: e.SeqNo}));
+              Clear(colEqDeleted);
+              Set(varConfirmDel, false)
+            TemplateFill: =If(ThisItem.ID = varEdit.ID, RGBA(227, 237, 253, 1), RGBA(255, 255, 255, 1))
+            TemplatePadding: =2
+            TemplateSize: =44
+            Width: =360
+            X: =12
+            Y: =438
+          Children:
+            - lblAdmItemNo:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =RGBA(31, 111, 235, 1)
+                  FontWeight: =FontWeight.Bold
+                  Height: =Parent.TemplateHeight
+                  OnSelect: =Select(Parent)
+                  Size: =13
+                  Text: =Text(ThisItem.ItemNo)
+                  Width: =44
+                  X: =4
+                  Y: =0
+            - lblAdmItemName:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =RGBA(28, 36, 48, 1)
+                  Height: =Parent.TemplateHeight
+                  OnSelect: =Select(Parent)
+                  Size: =13
+                  Text: =ThisItem.Title
+                  Width: =Parent.TemplateWidth - 52
+                  X: =48
+                  Y: =0
+      - lblNoEdit:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(93, 107, 122, 1)
+            Height: =60
+            Size: =13
+            Text: |-
+              ="左の一覧から検査項目を選択するか、「＋ 検査項目」で追加してください。"
+            Visible: =IsBlank(varEdit)
+            Width: =Parent.Width - 400
+            X: =388
+            Y: =76
+      - conEditor:
+          Control: GroupContainer@1.3.0
+          Variant: AutoLayout
+          Properties:
+            BorderColor: =RGBA(213, 219, 226, 1)
+            BorderThickness: =1
+            DropShadow: =DropShadow.None
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =Parent.Height - 88
+            LayoutDirection: =LayoutDirection.Vertical
+            LayoutGap: =2
+            LayoutOverflowY: =LayoutOverflow.Scroll
+            PaddingBottom: =24
+            PaddingLeft: =20
+            PaddingRight: =20
+            PaddingTop: =12
+            Visible: =!IsBlank(varEdit)
+            Width: =Parent.Width - 400
+            X: =388
+            Y: =76
+          Children:
+            - lblEditHead:
+                Control: Label@2.5.1
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: =RGBA(28, 36, 48, 1)
+                  FillPortions: =0
+                  FontWeight: =FontWeight.Bold
+                  Height: =40
+                  Size: =18
+                  Text: |-
+                    ="検査項目の編集"
+            - lblNo:
+                Control: Label@2.5.1
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: =RGBA(93, 107, 122, 1)
+                  FillPortions: =0
+                  FontWeight: =FontWeight.Semibold
+                  Height: =24
+                  Size: =11
+                  Text: |-
+                    ="No.（数字・並び順）"
+            - txtNo:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Default: =Text(varEdit.ItemNo)
+                  FillPortions: =0
+                  Height: =40
+                  Size: =13
+            - lblName:
+                Control: Label@2.5.1
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: =RGBA(93, 107, 122, 1)
+                  FillPortions: =0
+                  FontWeight: =FontWeight.Semibold
+                  Height: =24
+                  Size: =11
+                  Text: |-
+                    ="検査項目名"
+            - txtName:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Default: =varEdit.Title
+                  FillPortions: =0
+                  Height: =40
+                  Size: =13
+            - lblCategory:
+                Control: Label@2.5.1
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: =RGBA(93, 107, 122, 1)
+                  FillPortions: =0
+                  FontWeight: =FontWeight.Semibold
+                  Height: =24
+                  Size: =11
+                  Text: |-
+                    ="分類"
+            - txtCategory:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Default: =varEdit.Category
+                  FillPortions: =0
+                  Height: =40
+                  HintText: |-
+                    ="例：外観／電気特性／機能"
+                  Size: =13
+            - lblMethod:
+                Control: Label@2.5.1
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: =RGBA(93, 107, 122, 1)
+                  FillPortions: =0
+                  FontWeight: =FontWeight.Semibold
+                  Height: =24
+                  Size: =11
+                  Text: |-
+                    ="検査方法（手順：1行が1ステップ）"
+            - txtMethod:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Default: =varEdit.Method
+                  FillPortions: =0
+                  Height: =150
+                  Mode: =TextMode.MultiLine
+                  Size: =13
+            - lblCriteria:
+                Control: Label@2.5.1
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: =RGBA(93, 107, 122, 1)
+                  FillPortions: =0
+                  FontWeight: =FontWeight.Semibold
+                  Height: =24
+                  Size: =11
+                  Text: |-
+                    ="判定基準"
+            - txtCriteria:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Default: =varEdit.Criteria
+                  FillPortions: =0
+                  Height: =80
+                  Mode: =TextMode.MultiLine
+                  Size: =13
+            - lblTesterNo:
+                Control: Label@2.5.1
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: =RGBA(93, 107, 122, 1)
+                  FillPortions: =0
+                  FontWeight: =FontWeight.Semibold
+                  Height: =24
+                  Size: =11
+                  Text: |-
+                    ="テスター品番"
+            - txtTesterNo:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Default: =varEdit.TesterNo
+                  FillPortions: =0
+                  Height: =40
+                  Size: =13
+            - lblTesterName:
+                Control: Label@2.5.1
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: =RGBA(93, 107, 122, 1)
+                  FillPortions: =0
+                  FontWeight: =FontWeight.Semibold
+                  Height: =24
+                  Size: =11
+                  Text: |-
+                    ="テスター名"
+            - txtTesterName:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Default: =varEdit.TesterName
+                  FillPortions: =0
+                  Height: =40
+                  Size: =13
+            - lblEq:
+                Control: Label@2.5.1
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: =RGBA(93, 107, 122, 1)
+                  FillPortions: =0
+                  FontWeight: =FontWeight.Semibold
+                  Height: =24
+                  Size: =11
+                  Text: |-
+                    ="使用設備（種類／品番・バージョン／名称／備考）"
+            - galEq:
+                Control: Gallery@2.15.0
+                Variant: Vertical
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  FillPortions: =0
+                  Height: =Max(1, CountRows(colEditEq)) * 48
+                  Items: =colEditEq
+                  TemplatePadding: =0
+                  TemplateSize: =48
+                Children:
+                  - ddEqType:
+                      Control: Classic/DropDown@2.3.1
+                      Properties:
+                        Default: =ThisItem.EquipType
+                        Height: =40
+                        Items: |-
+                          =["周辺設備", "ハーネス", "ソフトウェア"]
+                        OnChange: |-
+                          =Patch(colEditEq, ThisItem, {EquipType: Self.Selected.Value})
+                        Size: =12
+                        Width: =150
+                        X: =0
+                        Y: =4
+                  - txtEqCode:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Default: =ThisItem.Code
+                        Height: =40
+                        HintText: |-
+                          ="品番／バージョン"
+                        OnChange: |-
+                          =Patch(colEditEq, ThisItem, {Code: Self.Text})
+                        Size: =13
+                        Width: =190
+                        X: =158
+                        Y: =4
+                  - txtEqName:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Default: =ThisItem.EqName
+                        Height: =40
+                        HintText: |-
+                          ="名称"
+                        OnChange: |-
+                          =Patch(colEditEq, ThisItem, {EqName: Self.Text})
+                        Size: =13
+                        Width: =Parent.TemplateWidth - 356 - 8 - 240 - 8 - 48
+                        X: =356
+                        Y: =4
+                  - txtEqNote:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        Default: =ThisItem.Note
+                        Height: =40
+                        HintText: |-
+                          ="備考"
+                        OnChange: |-
+                          =Patch(colEditEq, ThisItem, {Note: Self.Text})
+                        Size: =13
+                        Width: =240
+                        X: =Parent.TemplateWidth - 48 - 8 - 240
+                        Y: =4
+                  - btnEqDel:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderColor: =RGBA(213, 219, 226, 1)
+                        BorderThickness: =1
+                        Color: =RGBA(198, 40, 40, 1)
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Height: =40
+                        HoverColor: =RGBA(28, 36, 48, 1)
+                        HoverFill: =RGBA(238, 241, 244, 1)
+                        OnSelect: |-
+                          =If(ThisItem.EqID > 0, Collect(colEqDeleted, {EqID: ThisItem.EqID}));
+                          Remove(colEditEq, ThisItem)
+                        Size: =13
+                        Text: |-
+                          ="✕"
+                        Width: =44
+                        X: =Parent.TemplateWidth - 44
+                        Y: =4
+            - btnAddEq:
+                Control: Classic/Button@2.2.0
+                Properties:
+                  AlignInContainer: =AlignInContainer.Start
+                  BorderColor: =RGBA(213, 219, 226, 1)
+                  BorderThickness: =1
+                  Color: =RGBA(28, 36, 48, 1)
+                  Fill: =RGBA(255, 255, 255, 1)
+                  FillPortions: =0
+                  Height: =40
+                  HoverColor: =RGBA(28, 36, 48, 1)
+                  HoverFill: =RGBA(238, 241, 244, 1)
+                  OnSelect: |-
+                    =Collect(colEditEq, {Key: Text(GUID()), EqID: 0, EquipType: "周辺設備", Code: "", EqName: "", Note: "", Seq: Max(colEditEq, Seq) + 1})
+                  Size: =12
+                  Text: |-
+                    ="＋ 設備を追加"
+                  Width: =200
+            - lblNotes:
+                Control: Label@2.5.1
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: =RGBA(93, 107, 122, 1)
+                  FillPortions: =0
+                  FontWeight: =FontWeight.Semibold
+                  Height: =24
+                  Size: =11
+                  Text: |-
+                    ="特記事項（閲覧画面で警告枠として先頭に表示）"
+            - txtNotes:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Default: =varEdit.Notes
+                  FillPortions: =0
+                  Height: =80
+                  Mode: =TextMode.MultiLine
+                  Size: =13
+            - lblOther:
+                Control: Label@2.5.1
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Color: =RGBA(93, 107, 122, 1)
+                  FillPortions: =0
+                  FontWeight: =FontWeight.Semibold
+                  Height: =24
+                  Size: =11
+                  Text: |-
+                    ="その他"
+            - txtOther:
+                Control: Classic/TextInput@2.3.2
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  Default: =varEdit.Other
+                  FillPortions: =0
+                  Height: =80
+                  Mode: =TextMode.MultiLine
+                  Size: =13
+            - conItemButtons:
+                Control: GroupContainer@1.3.0
+                Variant: AutoLayout
+                Properties:
+                  AlignInContainer: =AlignInContainer.Stretch
+                  DropShadow: =DropShadow.None
+                  FillPortions: =0
+                  Height: =56
+                  LayoutAlignItems: =LayoutAlignItems.Center
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =12
+                  PaddingTop: =8
+                Children:
+                  - btnSaveItem:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderColor: =RGBA(31, 111, 235, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        Fill: =RGBA(31, 111, 235, 1)
+                        FillPortions: =0
+                        Height: =44
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =RGBA(25, 95, 205, 1)
+                        OnSelect: |-
+                          =If(IsBlank(Trim(txtName.Text)),
+                              Notify("検査項目名を入力してください", NotificationType.Error),
+                              Set(varEdit, Patch(InspItems, LookUp(InspItems, ID = varEdit.ID), {
+                                  Title: Trim(txtName.Text),
+                                  ItemNo: Value(txtNo.Text),
+                                  Category: txtCategory.Text,
+                                  Method: txtMethod.Text,
+                                  Criteria: txtCriteria.Text,
+                                  TesterNo: txtTesterNo.Text,
+                                  TesterName: txtTesterName.Text,
+                                  Notes: txtNotes.Text,
+                                  Other: txtOther.Text
+                              }));
+                              ForAll(colEqDeleted As d, RemoveIf(InspEquipment, ID = d.EqID));
+                              ForAll(galEq.AllItems As g,
+                                  Patch(InspEquipment,
+                                      If(g.EqID = 0, Defaults(InspEquipment), LookUp(InspEquipment, ID = g.EqID)),
+                                      {
+                                          Title: g.txtEqName.Text,
+                                          Code: g.txtEqCode.Text,
+                                          Note: g.txtEqNote.Text,
+                                          EquipType: g.ddEqType.Selected.Value,
+                                          SeqNo: g.Seq,
+                                          ItemID: varEdit.ID,
+                                          ProductID: varAdmProduct.ID
+                                      }
+                                  )
+                              );
+                              ClearCollect(colEditEq, ForAll(Sort(Filter(InspEquipment, ItemID = varEdit.ID), SeqNo, SortOrder.Ascending) As e, {Key: Text(GUID()), EqID: e.ID, EquipType: e.EquipType, Code: e.Code, EqName: e.Title, Note: e.Note, Seq: e.SeqNo}));
+                          Clear(colEqDeleted);
+                              ClearCollect(colAdmItems, Sort(Filter(InspItems, ProductID = varAdmProduct.ID), ItemNo, SortOrder.Ascending));
+                              Notify("保存しました", NotificationType.Success)
+                          )
+                        Size: =14
+                        Text: |-
+                          ="保存"
+                        Width: =160
+                  - btnDelItem:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderColor: =RGBA(198, 40, 40, 1)
+                        BorderThickness: =1
+                        Color: =If(varConfirmDel, RGBA(255, 255, 255, 1), RGBA(198, 40, 40, 1))
+                        Fill: =If(varConfirmDel, RGBA(198, 40, 40, 1), RGBA(255, 255, 255, 1))
+                        FillPortions: =0
+                        Height: =44
+                        HoverColor: =If(varConfirmDel, RGBA(255, 255, 255, 1), RGBA(198, 40, 40, 1))
+                        HoverFill: =If(varConfirmDel, RGBA(198, 40, 40, 1), RGBA(253, 231, 231, 1))
+                        OnSelect: |-
+                          =If(!varConfirmDel,
+                              Set(varConfirmDel, true),
+                              With({iid: varEdit.ID},
+                                  RemoveIf(InspEquipment, ItemID = iid);
+                                  RemoveIf(InspItems, ID = iid)
+                              );
+                              Set(varEdit, LookUp(InspItems, ID = -1));
+                              Clear(colEditEq);
+                              Set(varConfirmDel, false);
+                              ClearCollect(colAdmItems, Sort(Filter(InspItems, ProductID = varAdmProduct.ID), ItemNo, SortOrder.Ascending));
+                              Notify("検査項目を削除しました", NotificationType.Success)
+                          )
+                        Size: =13
+                        Text: |-
+                          =If(varConfirmDel, "本当に削除する", "この項目を削除")
+                        Width: =180

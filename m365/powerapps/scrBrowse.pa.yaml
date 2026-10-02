@@ -1,0 +1,289 @@
+- conBrowse:
+    Control: GroupContainer@1.3.0
+    Variant: ManualLayout
+    Properties:
+      DropShadow: =DropShadow.None
+      Fill: =RGBA(244, 246, 248, 1)
+      Height: =Parent.Height
+      Width: =Parent.Width
+      X: =0
+      Y: =0
+    Children:
+      - recBrowseHeader:
+          Control: Rectangle@2.3.0
+          Properties:
+            Fill: =RGBA(31, 111, 235, 1)
+            Height: =64
+            Width: =Parent.Width
+            X: =0
+            Y: =0
+      - lblBrowseTitle:
+          Control: Label@2.5.1
+          Properties:
+            Color: =RGBA(255, 255, 255, 1)
+            FontWeight: =FontWeight.Bold
+            Height: =64
+            Size: =18
+            Text: |-
+              ="検査情報"
+            Width: =130
+            X: =16
+            Y: =0
+      - ddProduct:
+          Control: Classic/DropDown@2.3.1
+          Properties:
+            Default: =varProduct.Label
+            Height: =40
+            Items: =ForAll(colProducts, ThisRecord.Label)
+            OnChange: |-
+              =Set(varProduct, LookUp(colProducts, Label = Self.Selected.Value));
+              ClearCollect(colTmp, Sort(Filter(InspItems, ProductID = varProduct.ID), ItemNo, SortOrder.Ascending));
+              ClearCollect(colItems, ForAll(Sequence(CountRows(colTmp)) As n, Patch(Index(colTmp, n.Value), {RowNo: n.Value})));
+              ClearCollect(colEqAll, Filter(InspEquipment, ProductID = varProduct.ID));
+              Set(varItem, First(colItems));
+              Set(varView, "item")
+            Size: =13
+            Width: =Min(460, Parent.Width - 520)
+            X: =150
+            Y: =12
+      - btnSummary:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(213, 219, 226, 1)
+            BorderThickness: =1
+            Color: =RGBA(28, 36, 48, 1)
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =40
+            HoverColor: =RGBA(28, 36, 48, 1)
+            HoverFill: =RGBA(238, 241, 244, 1)
+            OnSelect: |-
+              =Set(varView, If(varView = "summary", "item", "summary"))
+            Size: =13
+            Text: |-
+              =If(varView = "summary", "検査項目に戻る", "設備まとめ")
+            Width: =160
+            X: =Parent.Width - 336
+            Y: =12
+      - btnGoAdmin:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(213, 219, 226, 1)
+            BorderThickness: =1
+            Color: =RGBA(28, 36, 48, 1)
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =40
+            HoverColor: =RGBA(28, 36, 48, 1)
+            HoverFill: =RGBA(238, 241, 244, 1)
+            OnSelect: |-
+              =Set(varAdmProduct, LookUp(colProducts, ID = varProduct.ID));
+              ClearCollect(colAdmItems, Sort(Filter(InspItems, ProductID = varAdmProduct.ID), ItemNo, SortOrder.Ascending));
+              Set(varEdit, LookUp(InspItems, ID = -1));
+              Navigate(scrAdmin, ScreenTransition.None)
+            Size: =13
+            Text: |-
+              ="管理"
+            Visible: =varIsAdmin
+            Width: =152
+            X: =Parent.Width - 168
+            Y: =12
+      - txtSearch:
+          Control: Classic/TextInput@2.3.2
+          Properties:
+            Default: |-
+              =""
+            DelayOutput: =true
+            Height: =40
+            HintText: |-
+              ="検索（項目名・品番・設備名など）"
+            Size: =13
+            Width: =320
+            X: =12
+            Y: =76
+      - galItems:
+          Control: Gallery@2.15.0
+          Variant: Vertical
+          Properties:
+            BorderColor: =RGBA(213, 219, 226, 1)
+            BorderThickness: =1
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =Parent.Height - 136
+            Items: |-
+              =With({q: Trim(txtSearch.Text)},
+                  If(IsBlank(q), colItems,
+                      Filter(colItems As it,
+                          q in it.Title || q in it.Category || q in Text(it.ItemNo) || q in it.Method ||
+                          q in it.Criteria || q in it.Notes || q in it.Other || q in it.TesterNo || q in it.TesterName ||
+                          CountRows(Filter(colEqAll, ItemID = it.ID && (q in Code || q in Title || q in Note))) > 0
+                      )
+                  )
+              )
+            OnSelect: |-
+              =Set(varItem, ThisItem);
+              Set(varView, "item")
+            TemplateFill: |-
+              =If(ThisItem.ID = varItem.ID && varView = "item", RGBA(227, 237, 253, 1), RGBA(255, 255, 255, 1))
+            TemplatePadding: =2
+            TemplateSize: =64
+            Width: =320
+            X: =12
+            Y: =124
+          Children:
+            - lblItemNo:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  Color: =RGBA(31, 111, 235, 1)
+                  FontWeight: =FontWeight.Bold
+                  Height: =Parent.TemplateHeight
+                  OnSelect: =Select(Parent)
+                  Size: =15
+                  Text: =Text(ThisItem.ItemNo)
+                  Width: =48
+                  X: =8
+                  Y: =0
+            - lblItemName:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =RGBA(28, 36, 48, 1)
+                  FontWeight: |-
+                    =If(ThisItem.ID = varItem.ID && varView = "item", FontWeight.Bold, FontWeight.Normal)
+                  Height: =30
+                  OnSelect: =Select(Parent)
+                  Size: =14
+                  Text: =ThisItem.Title
+                  Width: =Parent.TemplateWidth - 64
+                  X: =56
+                  Y: =6
+            - lblItemCat:
+                Control: Label@2.5.1
+                Properties:
+                  Color: =RGBA(93, 107, 122, 1)
+                  Height: =24
+                  OnSelect: =Select(Parent)
+                  Size: =10
+                  Text: =ThisItem.Category
+                  Width: =Parent.TemplateWidth - 64
+                  X: =56
+                  Y: =34
+      - recDetailBg:
+          Control: Rectangle@2.3.0
+          Properties:
+            BorderColor: =RGBA(213, 219, 226, 1)
+            BorderThickness: =1
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =Parent.Height - 88
+            Width: =Parent.Width - 356
+            X: =344
+            Y: =76
+      - htmlDetail:
+          Control: HtmlViewer@2.1.0
+          Properties:
+            Height: |-
+              =Parent.Height - If(varView = "item", 152, 96)
+            HtmlText: |-
+              =If(varView = "summary",
+              If(IsBlank(varProduct),
+                  "<div style='font-family:Meiryo,sans-serif;font-size:16px;line-height:1.6;color:#1c2430;padding:8px 16px'><p style='color:#5d6b7a;font-style:italic'>製品が登録されていません。</p></div>",
+                  With({testers: Distinct(Filter(colItems, Len(Trim(TesterNo & TesterName)) > 0), TesterNo & "｜" & TesterName)},
+                      "<div style='font-family:Meiryo,sans-serif;font-size:16px;line-height:1.6;color:#1c2430;padding:8px 16px'>" &
+                      "<div style='font-size:24px;font-weight:bold;margin:0'>使用設備まとめ</div>" &
+                      "<div style='color:#5d6b7a;font-size:14px;margin:2px 0 8px'>" & Substitute(Substitute(Substitute(varProduct.Label, "&", "&amp;"), "<", "&lt;"), ">", "&gt;") & "　・検査準備時の確認用</div>" &
+                      If(Len(Trim(varProduct.Description)) > 0, "<div>" & Substitute(Substitute(Substitute(Substitute(Substitute(varProduct.Description, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), Char(13), ""), Char(10), "<br>") & "</div>", "") &
+                      If(CountRows(testers) > 0,
+                          "<div style='font-size:17px;font-weight:bold;margin:20px 0 8px;padding-bottom:4px;border-bottom:2px solid #1f6feb'>テスター（" & CountRows(testers) & "）</div><table style='border-collapse:collapse;width:100%;font-size:15px;margin-bottom:8px'><tr>" &
+                          "<th style='border:1px solid #d5dbe2;background:#eef1f4;padding:5px 8px;text-align:left;white-space:nowrap'>" & "テスター品番" & "</th>" & "<th style='border:1px solid #d5dbe2;background:#eef1f4;padding:5px 8px;text-align:left;white-space:nowrap'>" & "テスター名" & "</th>" & "<th style='border:1px solid #d5dbe2;background:#eef1f4;padding:5px 8px;text-align:left;white-space:nowrap'>" & "使用する検査項目No." & "</th>" & "</tr>" &
+                          Concat(testers As d,
+                              "<tr>" & "<td style='border:1px solid #d5dbe2;padding:5px 8px;vertical-align:top'>" & Substitute(Substitute(Substitute(First(Split(d.Value, "｜")).Value, "&", "&amp;"), "<", "&lt;"), ">", "&gt;") & "</td>" & "<td style='border:1px solid #d5dbe2;padding:5px 8px;vertical-align:top'>" & Substitute(Substitute(Substitute(Last(Split(d.Value, "｜")).Value, "&", "&amp;"), "<", "&lt;"), ">", "&gt;") & "</td>" &
+                              "<td style='border:1px solid #d5dbe2;padding:5px 8px;vertical-align:top'>" & Concat(Filter(colItems, TesterNo & "｜" & TesterName = d.Value), Text(ItemNo), ", ") & "</td>" & "</tr>") &
+                          "</table>", "") &
+                      Concat(Table({T: "周辺設備", C: "品番"}, {T: "ハーネス", C: "品番"}, {T: "ソフトウェア", C: "バージョン"}) As ty,
+                          With({ds: Distinct(Filter(colEqAll, EquipType = ty.T), Code & "｜" & Title)},
+                              If(CountRows(ds) = 0, "",
+                                  "<div style='font-size:17px;font-weight:bold;margin:20px 0 8px;padding-bottom:4px;border-bottom:2px solid #1f6feb'>" & ty.T & "（" & CountRows(ds) & "）</div><table style='border-collapse:collapse;width:100%;font-size:15px;margin-bottom:8px'><tr>" &
+                                  "<th style='border:1px solid #d5dbe2;background:#eef1f4;padding:5px 8px;text-align:left;white-space:nowrap'>" & ty.C & "</th>" & "<th style='border:1px solid #d5dbe2;background:#eef1f4;padding:5px 8px;text-align:left;white-space:nowrap'>" & "名称" & "</th>" & "<th style='border:1px solid #d5dbe2;background:#eef1f4;padding:5px 8px;text-align:left;white-space:nowrap'>" & "使用する検査項目No." & "</th>" & "</tr>" &
+                                  Concat(ds As d,
+                                      "<tr>" & "<td style='border:1px solid #d5dbe2;padding:5px 8px;vertical-align:top'>" & Substitute(Substitute(Substitute(First(Split(d.Value, "｜")).Value, "&", "&amp;"), "<", "&lt;"), ">", "&gt;") & "</td>" & "<td style='border:1px solid #d5dbe2;padding:5px 8px;vertical-align:top'>" & Substitute(Substitute(Substitute(Last(Split(d.Value, "｜")).Value, "&", "&amp;"), "<", "&lt;"), ">", "&gt;") & "</td>" &
+                                      "<td style='border:1px solid #d5dbe2;padding:5px 8px;vertical-align:top'>" & Concat(Filter(colEqAll, EquipType = ty.T && Code & "｜" & Title = d.Value) As r, Text(LookUp(colItems, ID = r.ItemID).ItemNo), ", ") & "</td>" &
+                                      "</tr>") &
+                                  "</table>"))) &
+                      If(CountRows(testers) = 0 && CountRows(colEqAll) = 0, "<p style='color:#5d6b7a;font-style:italic'>登録された設備はありません。</p>", "") &
+                      "</div>"
+                  )
+              ),
+              If(IsBlank(varItem),
+                  "<div style='font-family:Meiryo,sans-serif;font-size:16px;line-height:1.6;color:#1c2430;padding:8px 16px'><p style='color:#5d6b7a;font-style:italic'>" & If(IsBlank(varProduct), "製品が登録されていません。", "左の一覧から検査項目を選択してください。") & "</p></div>",
+                  With({eq: Filter(colEqAll, ItemID = varItem.ID)},
+                      "<div style='font-family:Meiryo,sans-serif;font-size:16px;line-height:1.6;color:#1c2430;padding:8px 16px'>" &
+                      "<div style='font-size:24px;font-weight:bold;margin:0'>" & Text(varItem.ItemNo) & ". " & Substitute(Substitute(Substitute(varItem.Title, "&", "&amp;"), "<", "&lt;"), ">", "&gt;") &
+                      If(Len(Trim(varItem.Category)) > 0, "<span style='display:inline-block;background:#eef1f4;color:#5d6b7a;border-radius:10px;padding:1px 10px;font-size:13px;margin-left:8px;vertical-align:middle'>" & Substitute(Substitute(Substitute(varItem.Category, "&", "&amp;"), "<", "&lt;"), ">", "&gt;") & "</span>", "") & "</div>" &
+                      "<div style='color:#5d6b7a;font-size:14px;margin:2px 0 8px'>" & Substitute(Substitute(Substitute(varProduct.Label, "&", "&amp;"), "<", "&lt;"), ">", "&gt;") & "</div>" &
+                      If(Len(Trim(varItem.Notes)) > 0,
+                          "<div style='font-size:17px;font-weight:bold;margin:20px 0 8px;padding-bottom:4px;border-bottom:2px solid #1f6feb'>特記事項 <span style='color:#1f6feb;font-size:13px;font-weight:normal'>必ず確認</span></div>" &
+                          "<div style='background:#fff4d6;color:#6b4e00;border:1px solid #e0a800;border-left:6px solid #e0a800;border-radius:6px;padding:10px 14px;font-weight:bold'>⚠ " & Substitute(Substitute(Substitute(Substitute(Substitute(varItem.Notes, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), Char(13), ""), Char(10), "<br>") & "</div>", "") &
+                      "<div style='font-size:17px;font-weight:bold;margin:20px 0 8px;padding-bottom:4px;border-bottom:2px solid #1f6feb'>検査方法</div>" &
+                      If(Len(Trim(varItem.Method)) > 0,
+                          "<ol style='margin:0;padding-left:28px'>" &
+                          Concat(Filter(Split(Substitute(varItem.Method, Char(13), ""), Char(10)), Len(Trim(Value)) > 0),
+                              "<li style='background:#eef1f4;border-radius:6px;padding:8px 10px;margin-bottom:6px;font-size:17px'>" & Substitute(Substitute(Substitute(Trim(Value), "&", "&amp;"), "<", "&lt;"), ">", "&gt;") & "</li>") &
+                          "</ol>",
+                          "<div style='color:#5d6b7a;font-style:italic'>なし</div>") &
+                      If(Len(Trim(varItem.Criteria)) > 0,
+                          "<div style='font-size:17px;font-weight:bold;margin:20px 0 8px;padding-bottom:4px;border-bottom:2px solid #1f6feb'>判定基準</div><div>" & Substitute(Substitute(Substitute(Substitute(Substitute(varItem.Criteria, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), Char(13), ""), Char(10), "<br>") & "</div>", "") &
+                      "<div style='font-size:17px;font-weight:bold;margin:20px 0 8px;padding-bottom:4px;border-bottom:2px solid #1f6feb'>使用設備</div>" &
+                      If(Len(Trim(varItem.TesterNo & varItem.TesterName)) > 0,
+                          "<table style='border-collapse:collapse;width:100%;font-size:15px;margin-bottom:8px'><tr>" & "<th style='border:1px solid #d5dbe2;background:#eef1f4;padding:5px 8px;text-align:left;white-space:nowrap'>" & "テスター品番" & "</th>" & "<td style='border:1px solid #d5dbe2;padding:5px 8px;vertical-align:top'>" & "<b>" & Substitute(Substitute(Substitute(varItem.TesterNo, "&", "&amp;"), "<", "&lt;"), ">", "&gt;") & "</b>" & "</td>" & "</tr>" &
+                          "<tr>" & "<th style='border:1px solid #d5dbe2;background:#eef1f4;padding:5px 8px;text-align:left;white-space:nowrap'>" & "テスター名" & "</th>" & "<td style='border:1px solid #d5dbe2;padding:5px 8px;vertical-align:top'>" & "<b>" & Substitute(Substitute(Substitute(varItem.TesterName, "&", "&amp;"), "<", "&lt;"), ">", "&gt;") & "</b>" & "</td>" & "</tr></table>", "") &
+                      Concat(Table({T: "周辺設備", C: "品番"}, {T: "ハーネス", C: "品番"}, {T: "ソフトウェア", C: "バージョン"}) As ty,
+                          With({rows: Sort(Filter(eq, EquipType = ty.T), SeqNo, SortOrder.Ascending)},
+                              If(CountRows(rows) = 0, "",
+                                  "<div style='font-size:15px;font-weight:bold;margin:12px 0 4px'>" & ty.T & "</div><table style='border-collapse:collapse;width:100%;font-size:15px;margin-bottom:8px'><tr>" &
+                                  "<th style='border:1px solid #d5dbe2;background:#eef1f4;padding:5px 8px;text-align:left;white-space:nowrap'>" & ty.C & "</th>" & "<th style='border:1px solid #d5dbe2;background:#eef1f4;padding:5px 8px;text-align:left;white-space:nowrap'>" & "名称" & "</th>" & "<th style='border:1px solid #d5dbe2;background:#eef1f4;padding:5px 8px;text-align:left;white-space:nowrap'>" & "備考" & "</th>" & "</tr>" &
+                                  Concat(rows, "<tr>" & "<td style='border:1px solid #d5dbe2;padding:5px 8px;vertical-align:top'>" & Substitute(Substitute(Substitute(Code, "&", "&amp;"), "<", "&lt;"), ">", "&gt;") & "</td>" & "<td style='border:1px solid #d5dbe2;padding:5px 8px;vertical-align:top'>" & Substitute(Substitute(Substitute(Title, "&", "&amp;"), "<", "&lt;"), ">", "&gt;") & "</td>" & "<td style='border:1px solid #d5dbe2;padding:5px 8px;vertical-align:top'>" & Substitute(Substitute(Substitute(Note, "&", "&amp;"), "<", "&lt;"), ">", "&gt;") & "</td>" & "</tr>") &
+                                  "</table>"))) &
+                      If(!(Len(Trim(varItem.TesterNo & varItem.TesterName)) > 0) && CountRows(eq) = 0, "<div style='color:#5d6b7a;font-style:italic'>なし</div>", "") &
+                      If(Len(Trim(varItem.Other)) > 0,
+                          "<div style='font-size:17px;font-weight:bold;margin:20px 0 8px;padding-bottom:4px;border-bottom:2px solid #1f6feb'>その他</div><div>" & Substitute(Substitute(Substitute(Substitute(Substitute(varItem.Other, "&", "&amp;"), "<", "&lt;"), ">", "&gt;"), Char(13), ""), Char(10), "<br>") & "</div>", "") &
+                      "</div>"
+                  )
+              ))
+            Width: =Parent.Width - 364
+            X: =348
+            Y: =80
+      - btnPrev:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(213, 219, 226, 1)
+            BorderThickness: =1
+            Color: =RGBA(28, 36, 48, 1)
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =44
+            HoverColor: =RGBA(28, 36, 48, 1)
+            HoverFill: =RGBA(238, 241, 244, 1)
+            OnSelect: =Set(varItem, LookUp(colItems, RowNo = varItem.RowNo - 1))
+            Size: =13
+            Text: |-
+              ="← " & Text(LookUp(colItems, RowNo = varItem.RowNo - 1).ItemNo) & " " & LookUp(colItems, RowNo = varItem.RowNo - 1).Title
+            Visible: |-
+              =varView = "item" && !IsBlank(LookUp(colItems, RowNo = varItem.RowNo - 1))
+            Width: =(Parent.Width - 380) / 2 - 6
+            X: =356
+            Y: =Parent.Height - 64
+      - btnNext:
+          Control: Classic/Button@2.2.0
+          Properties:
+            BorderColor: =RGBA(31, 111, 235, 1)
+            BorderThickness: =1
+            Color: =RGBA(255, 255, 255, 1)
+            Fill: =RGBA(31, 111, 235, 1)
+            Height: =44
+            HoverColor: =RGBA(255, 255, 255, 1)
+            HoverFill: =RGBA(25, 95, 205, 1)
+            OnSelect: =Set(varItem, LookUp(colItems, RowNo = varItem.RowNo + 1))
+            Size: =13
+            Text: |-
+              =Text(LookUp(colItems, RowNo = varItem.RowNo + 1).ItemNo) & " " & LookUp(colItems, RowNo = varItem.RowNo + 1).Title & " →"
+            Visible: |-
+              =varView = "item" && !IsBlank(LookUp(colItems, RowNo = varItem.RowNo + 1))
+            Width: =(Parent.Width - 380) / 2 - 6
+            X: =356 + (Parent.Width - 380) / 2 + 6
+            Y: =Parent.Height - 64
