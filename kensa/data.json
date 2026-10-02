@@ -1,0 +1,46 @@
+{
+  "settings": {
+    "title": "製品検査アプリ",
+    "subtitle": "検査項目・検査方法・使用設備 確認システム",
+    "adminPasswordHash": "d3fab4c44720d8014c9ce649b2dc130cfa708c23642d716176a8ab10e66d55ea",
+    "updatedAt": "2026-10-02"
+  },
+  "products": [
+    {
+      "id": "p-sample-001",
+      "name": "サンプル製品 A（例）",
+      "code": "PRD-A-001",
+      "note": "これはサンプルです。管理者モードで編集・削除できます。",
+      "items": [
+        {
+          "id": "i-sample-001",
+          "name": "外観検査",
+          "method": "目視にて傷・打痕・汚れ・刻印のかすれがないか全面を確認する。照度は500lx以上を確保すること。",
+          "equipment": {
+            "testerPartNo": "-",
+            "testerName": "検査照明ブース",
+            "peripherals": "拡大鏡（10倍）、限度見本",
+            "harness": "-",
+            "software": "-"
+          },
+          "notes": "限度見本と比較し、判定に迷う場合は検査責任者に確認する。",
+          "other": "1時間ごとに限度見本を再確認する。"
+        },
+        {
+          "id": "i-sample-002",
+          "name": "電気特性検査（導通・絶縁）",
+          "method": "テスターに製品をセットし、スタートボタンを押下。判定結果（OK/NG）を確認する。NG時は端子番号を記録する。",
+          "equipment": {
+            "testerPartNo": "TST-12345",
+            "testerName": "導通絶縁検査機 Model-X",
+            "peripherals": "専用治具 JIG-001、AC電源ユニット",
+            "harness": "HN-A-001（製品Aテスト用ハーネス）",
+            "software": "InspectWare v2.3（レシピ: PRD-A-001）"
+          },
+          "notes": "測定前に基準抵抗でキャリブレーションを実施（始業時1回）。",
+          "other": "データは自動でサーバ保存される。保存失敗時は手動エクスポート。"
+        }
+      ]
+    }
+  ]
+}
