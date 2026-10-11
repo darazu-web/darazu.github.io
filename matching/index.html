@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <!-- スマホで見やすくするための「おまじない」。拡大縮小を適切にします -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>照合アプリ（Step1+2）</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== 画面の見た目をここに書く ===== -->
+
+  <header class="app-header">
+    <h1>照合アプリ</h1>
+    <p class="subtitle">Step 1+2：カメラでバーコードを読む</p>
+  </header>
+
+  <main class="container">
+
+    <!-- カメラ映像が、この箱の中に表示されます -->
+    <div id="reader"></div>
+
+    <!-- 「スキャン開始／停止」ボタン -->
+    <div class="controls">
+      <button id="startBtn" class="btn btn-primary">スキャン開始</button>
+      <button id="stopBtn" class="btn btn-secondary" disabled>停止</button>
+    </div>
+
+    <!-- 今読んだコードを大きく表示する場所 -->
+    <section class="result-card">
+      <div class="result-label">読み取った値</div>
+      <div id="lastResult" class="result-value">まだ読んでいません</div>
+    </section>
+
+    <!-- 読み取りの履歴（新しいものが上に積まれます） -->
+    <section class="history">
+      <div class="history-header">
+        <span>読み取り履歴</span>
+        <span id="count" class="count-badge">0 件</span>
+      </div>
+      <ul id="historyList" class="history-list"></ul>
+    </section>
+
+    <!-- 動作状況や注意メッセージを出す場所 -->
+    <p id="status" class="status"></p>
+
+  </main>
+
+  <!-- ===== プログラム本体を読み込む =====
+       ・1つめ：バーコード読み取りライブラリ（アプリに同梱＝オフラインでも動く）
+       ・2つめ：このアプリ専用の処理（app.js） -->
+  <script src="lib/html5-qrcode.min.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
