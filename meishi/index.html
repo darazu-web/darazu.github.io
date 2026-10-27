@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- ▼▼ ここを自分の名前に変える（スマホのタブに出る文字） ▼▼ -->
+  <title>〇〇 〇〇 ｜ 動く名刺</title>
+  <!-- ▲▲ ここまで ▲▲ -->
+
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="card">
+
+    <!-- 動画エリア -->
+    <div class="video-wrap">
+      <!--
+        ▼ 自分の動画を meishi フォルダに「me.mp4」という名前で置くと、ここに表示されます。
+          ・autoplay loop muted playsinline の4つはスマホ自動再生に必須なので消さないこと
+          ・poster="poster.jpg" を置くと、読み込み中に表示する静止画を指定できます（任意）
+      -->
+      <video
+        id="meVideo"
+        src="me.mp4"
+        autoplay
+        loop
+        muted
+        playsinline
+        preload="auto"></video>
+
+      <!-- 動画がまだ無い / 読み込めないときに表示される案内（準備中は出ます） -->
+      <div id="placeholder" class="placeholder">
+        <div class="placeholder-icon">🎬</div>
+        <p>準備中<br><small>meishi フォルダに「me.mp4」を置くと<br>ここに動画が流れます</small></p>
+      </div>
+    </div>
+
+    <!-- プロフィール -->
+    <section class="profile">
+      <!-- ▼▼ ここから自分の情報に書き換える ▼▼ -->
+      <h1 class="name">〇〇 〇〇</h1>
+      <p class="title">Web制作 / デザイン</p>
+      <p class="bio">
+        はじめまして。ご覧いただきありがとうございます。<br>
+        お気軽にご連絡ください。
+      </p>
+
+      <!-- 連絡先ボタン（不要な行は削除、URLやアドレスは自分のものに差し替え） -->
+      <nav class="links">
+        <a class="btn" href="mailto:df4shima611@gmail.com">✉️ メール</a>
+        <a class="btn" href="https://example.com" target="_blank" rel="noopener">🌐 Webサイト</a>
+        <a class="btn" href="https://x.com/your_id" target="_blank" rel="noopener">𝕏 SNS</a>
+      </nav>
+      <!-- ▲▲ ここまで ▲▲ -->
+    </section>
+
+  </main>
+
+  <script>
+    // 動画が無い / 再生できない場合は「準備中」の案内を出す。
+    // 正常に動画が始まったら案内を消す。
+    (function () {
+      var video = document.getElementById('meVideo');
+      var placeholder = document.getElementById('placeholder');
+
+      function showPlaceholder() {
+        placeholder.style.display = 'flex';
+        video.style.display = 'none';
+      }
+      function hidePlaceholder() {
+        placeholder.style.display = 'none';
+        video.style.display = 'block';
+      }
+
+      // 読み込みエラー（me.mp4 が無いなど）→ 案内を表示
+      video.addEventListener('error', showPlaceholder);
+      // 再生が始まった → 案内を隠す
+      video.addEventListener('playing', hidePlaceholder);
+
+      // 一部スマホで autoplay が止められた場合に備えて、再生を試みる
+      var tryPlay = video.play();
+      if (tryPlay && typeof tryPlay.catch === 'function') {
+        tryPlay.catch(function () { /* ユーザー操作待ち。placeholderは出さない */ });
+      }
+
+      // 2秒待っても何も始まらず、動画の読み込みも進んでいなければ案内を表示
+      setTimeout(function () {
+        if (video.readyState === 0) showPlaceholder();
+      }, 2000);
+    })();
+  </script>
+</body>
+</html>

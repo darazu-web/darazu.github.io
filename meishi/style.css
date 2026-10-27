@@ -1,0 +1,95 @@
+/* ===========================================================
+   動く名刺（レベル1：動画名刺）スタイル
+   色やサイズを変えたいときは、下の変数の値を書き換えてください。
+   =========================================================== */
+
+:root {
+  --bg:        #0f1222;   /* 背景色 */
+  --card-bg:   #1b1f38;   /* カードの色 */
+  --text:      #f3f5ff;   /* 文字色 */
+  --muted:     #a7afd0;   /* 薄い文字色 */
+  --accent:    #6c7bff;   /* ボタンなどのアクセント色 */
+  --radius:    20px;      /* 角丸の大きさ */
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;                 /* スマホで端に寄りすぎないよう余白 */
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans",
+               "Noto Sans JP", "Yu Gothic", sans-serif;
+  line-height: 1.7;
+}
+
+/* 名刺カード本体 */
+.card {
+  width: 100%;
+  max-width: 420px;                   /* スマホで見やすい幅 */
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .45);
+}
+
+/* 動画エリア（縦長 3:4 の枠。人の全身〜バストアップに合いやすい） */
+.video-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  background: #000;
+}
+.video-wrap video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;                  /* 枠いっぱいに表示（はみ出しは切り取り） */
+  display: block;
+}
+
+/* 動画が無いときの「準備中」案内 */
+.placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: var(--muted);
+  background: linear-gradient(160deg, #23294a, #161a30);
+  padding: 20px;
+}
+.placeholder-icon { font-size: 44px; margin-bottom: 10px; }
+.placeholder small { color: #7f87ac; }
+
+/* プロフィール部分 */
+.profile { padding: 24px 22px 28px; text-align: center; }
+.name  { font-size: 26px; letter-spacing: .04em; }
+.title { color: var(--accent); font-weight: 700; margin: 4px 0 14px; }
+.bio   { color: var(--muted); font-size: 15px; margin-bottom: 20px; }
+
+/* 連絡先ボタン */
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.btn {
+  flex: 1 1 auto;
+  min-width: 120px;
+  padding: 12px 16px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 15px;
+  transition: transform .12s ease, opacity .12s ease;
+}
+.btn:active { transform: scale(.97); opacity: .9; }
