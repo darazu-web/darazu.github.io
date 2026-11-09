@@ -1,0 +1,138 @@
+/* =====================================================================
+   プロジェクト管理ツール  見た目（スタイル）
+   ===================================================================== */
+
+/* 全体のリセットと基本設定 */
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  background: #f4f6f8;
+  color: #333;
+}
+
+/* ===== ヘッダー ===== */
+.app-header {
+  background: #2d3e50;
+  color: #fff;
+  padding: 16px 20px;
+}
+.app-header h1 {
+  margin: 0 0 12px;
+  font-size: 20px;
+}
+
+/* タブ */
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tab {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px 6px 0 0;
+  background: #42566b;
+  color: #cdd6df;
+  cursor: pointer;
+  font-size: 14px;
+}
+.tab.is-active { background: #f4f6f8; color: #2d3e50; font-weight: bold; }
+.tab:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ===== 本体 ===== */
+.container { max-width: 960px; margin: 0 auto; padding: 20px; }
+
+/* 追加エリア */
+.add-area {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+.add-area input[type="text"] {
+  flex: 1 1 240px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+}
+.add-area input[type="date"] {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+}
+.add-area button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 6px;
+  background: #2e8b57;
+  color: #fff;
+  font-size: 15px;
+  cursor: pointer;
+}
+.add-area button:hover { background: #256f46; }
+
+/* ===== カンバン（3列）===== */
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.column {
+  background: #e9edf1;
+  border-radius: 8px;
+  padding: 12px;
+  min-height: 200px;
+}
+.column h2 {
+  font-size: 15px;
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.count {
+  display: inline-block;
+  min-width: 22px;
+  text-align: center;
+  background: #2d3e50;
+  color: #fff;
+  font-size: 12px;
+  border-radius: 11px;
+  padding: 2px 6px;
+}
+
+/* タスクカード */
+.card {
+  background: #fff;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
+.card .card-title { font-size: 14px; word-break: break-word; }
+.card .card-due { font-size: 12px; color: #888; margin-top: 4px; }
+
+/* カードの操作ボタン */
+.card-actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.card-actions button {
+  flex: 1;
+  border: 1px solid #ccc;
+  background: #fafafa;
+  border-radius: 4px;
+  padding: 4px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.card-actions button:hover { background: #eee; }
+.card-actions .del { color: #c0392b; }
+
+/* 補足テキスト */
+.note { margin-top: 24px; font-size: 12px; color: #999; }
+
+/* ===== スマホ対応：画面が狭いときは列を縦に並べる ===== */
+@media (max-width: 680px) {
+  .board { grid-template-columns: 1fr; }
+}

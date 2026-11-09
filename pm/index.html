@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>プロジェクト管理ツール</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ===== ヘッダー ===== -->
+  <header class="app-header">
+    <h1>プロジェクト管理ツール</h1>
+    <!-- タブ：今回は①マイタスクだけ。②③は次のステップで中身を作ります。 -->
+    <nav class="tabs">
+      <button class="tab is-active">① マイタスク</button>
+      <button class="tab" disabled>② チーム進捗（準備中）</button>
+      <button class="tab" disabled>③ 育成メモ（準備中）</button>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- ===== タスクを追加する入力エリア ===== -->
+    <section class="add-area">
+      <input type="text" id="titleInput" placeholder="やることを入力（例：資料を作る）">
+      <input type="date" id="dueInput" title="期限（任意）">
+      <button id="addBtn">＋ 追加</button>
+    </section>
+
+    <!-- ===== カンバン（3つの列）===== -->
+    <section class="board">
+
+      <!-- 未着手 -->
+      <div class="column" data-status="todo">
+        <h2>未着手 <span class="count" id="count-todo">0</span></h2>
+        <div class="cards" id="list-todo"></div>
+      </div>
+
+      <!-- 作業中 -->
+      <div class="column" data-status="doing">
+        <h2>作業中 <span class="count" id="count-doing">0</span></h2>
+        <div class="cards" id="list-doing"></div>
+      </div>
+
+      <!-- 完了 -->
+      <div class="column" data-status="done">
+        <h2>完了 <span class="count" id="count-done">0</span></h2>
+        <div class="cards" id="list-done"></div>
+      </div>
+
+    </section>
+
+    <p class="note">※ 入力したデータはこの端末のブラウザ内だけに保存されます（GitHubには送られません）。</p>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
